@@ -1,28 +1,13 @@
 <template>
   <div class="ww-datagrid" :class="{ editing: isEditing }" :style="cssVars">
-    <ag-grid-vue
-      :rowData="rowData"
-      :columnDefs="columnDefs"
-      :defaultColDef="defaultColDef"
-      :domLayout="content.layout === 'auto' ? 'autoHeight' : 'normal'"
-      :style="style"
-      :rowSelection="rowSelection"
-      :selection-column-def="{ pinned: true }"
-      :theme="theme"
-      :getRowId="getRowId"
-      :pagination="content.pagination"
-      :paginationPageSize="content.paginationPageSize || 10"
-      :paginationPageSizeSelector="false"
-      :suppressMovableColumns="!content.movableColumns"
-      :columnHoverHighlight="content.columnHoverHighlight"
-      :locale-text="localeText"
-      @grid-ready="onGridReady"
-      @row-selected="onRowSelected"
-      @selection-changed="onSelectionChanged"
-      @cell-value-changed="onCellValueChanged"
-      @filter-changed="onFilterChanged"
-      @sort-changed="onSortChanged"
-    >
+    <ag-grid-vue :rowData="rowData" :columnDefs="columnDefs" :defaultColDef="defaultColDef"
+      :domLayout="content.layout === 'auto' ? 'autoHeight' : 'normal'" :style="style" :rowSelection="rowSelection"
+      :selection-column-def="{ pinned: true }" :theme="theme" :getRowId="getRowId" :pagination="content.pagination"
+      :paginationPageSize="content.paginationPageSize || 10" :paginationPageSizeSelector="false"
+      :suppressMovableColumns="!content.movableColumns" :columnHoverHighlight="content.columnHoverHighlight"
+      :locale-text="localeText" @grid-ready="onGridReady" @row-selected="onRowSelected"
+      @selection-changed="onSelectionChanged" @cell-value-changed="onCellValueChanged" @filter-changed="onFilterChanged"
+      @sort-changed="onSortChanged" @row-clicked="onRowClicked">
     </ag-grid-vue>
   </div>
 </template>
@@ -112,7 +97,10 @@ export default {
         gridApi.value.setFilterModel(props.content.initialFilters);
       }
       if (props.content.initialSort) {
-        gridApi.value.applyColumnState({ state: props.content.initialSort || [], defaultState: { sort: null }, });
+        gridApi.value.applyColumnState({
+          state: props.content.initialSort || [],
+          defaultState: { sort: null },
+        });
       }
     });
 
@@ -133,7 +121,10 @@ export default {
     const onFilterChanged = (event) => {
       if (!gridApi.value) return;
       const filterModel = gridApi.value.getFilterModel();
-      if (JSON.stringify(filterModel || {}) !== JSON.stringify(filterValue.value || {})) {
+      if (
+        JSON.stringify(filterModel || {}) !==
+        JSON.stringify(filterValue.value || {})
+      ) {
         setFilters(filterModel);
         ctx.emit("trigger-event", {
           name: "filterChanged",
@@ -145,12 +136,15 @@ export default {
     const onSortChanged = (event) => {
       if (!gridApi.value) return;
       const state = gridApi.value.getState();
-      if (JSON.stringify(state.sort?.sortModel || []) !== JSON.stringify(sortValue.value || [])) {
+      if (
+        JSON.stringify(state.sort?.sortModel || []) !==
+        JSON.stringify(sortValue.value || [])
+      ) {
         setSort(state.sort?.sortModel || []);
-      ctx.emit("trigger-event", {
-        name: "sortChanged",
-        event: state.sort?.sortModel || [],
-      });
+        ctx.emit("trigger-event", {
+          name: "sortChanged",
+          event: state.sort?.sortModel || [],
+        });
       }
     };
 
@@ -202,7 +196,8 @@ export default {
       };
     },
     columnDefs() {
-      return this.content.columns.map((col) => {
+      // Primeiro, processamos as colunas normalmente
+      const processedColumns = this.content.columns.map((col) => {
         const minWidth =
           !col.minWidth || col.minWidth === "auto"
             ? null
@@ -222,10 +217,14 @@ export default {
           pinned: col.pinned === "none" ? false : col.pinned,
           width,
           flex,
+          hide: !!col.hide,
         };
+
+        let columnDef;
+
         switch (col.cellDataType) {
           case "action": {
-            return {
+            columnDef = {
               ...commonProperties,
               headerName: col.headerName,
               cellRenderer: "ActionCellRenderer",
@@ -238,9 +237,10 @@ export default {
               sortable: false,
               filter: false,
             };
+            break;
           }
           case "custom":
-            return {
+            columnDef = {
               ...commonProperties,
               headerName: col.headerName,
               field: col.field,
@@ -251,8 +251,9 @@ export default {
               sortable: col.sortable,
               filter: col.filter,
             };
+            break;
           case "image": {
-            return {
+            columnDef = {
               ...commonProperties,
               headerName: col.headerName,
               field: col.field,
@@ -262,9 +263,64 @@ export default {
                 height: col.imageHeight,
               },
             };
+            break;
+          }
+          case "formatted-number": {
+            columnDef = {
+              ...commonProperties,
+              headerName: col.headerName,
+              field: col.field,
+              sortable: col.sortable,
+              filter: col.filter,
+              editable: col.editable,
+              valueFormatter: (params) => {
+                if (params.value === null || params.value === undefined) return '';
+                return Number(params.value).toLocaleString('pt-BR', {
+                  minimumFractionDigits: col.decimalPlaces || 2,
+                  maximumFractionDigits: col.decimalPlaces || 2
+                });
+              }
+            };
+            break;
+          }
+          case "currency": {
+            columnDef = {
+              ...commonProperties,
+              headerName: col.headerName,
+              field: col.field,
+              sortable: col.sortable,
+              filter: col.filter,
+              editable: col.editable,
+              valueFormatter: (params) => {
+                if (params.value === null || params.value === undefined) return '';
+                return `R$ ${Number(params.value).toLocaleString('pt-BR', {
+                  minimumFractionDigits: col.decimalPlaces || 2,
+                  maximumFractionDigits: col.decimalPlaces || 2
+                })}`;
+              }
+            };
+            break;
+          }
+          case "percentage": {
+            columnDef = {
+              ...commonProperties,
+              headerName: col.headerName,
+              field: col.field,
+              sortable: col.sortable,
+              filter: col.filter,
+              editable: col.editable,
+              valueFormatter: (params) => {
+                if (params.value === null || params.value === undefined) return '';
+                return `${Number(params.value).toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}%`;
+              }
+            };
+            break;
           }
           default: {
-            const result = {
+            columnDef = {
               ...commonProperties,
               headerName: col.headerName,
               field: col.field,
@@ -272,29 +328,75 @@ export default {
               filter: col.filter,
               editable: col.editable,
             };
+
             if (col.useCustomLabel) {
-              result.valueFormatter = (params) => {
+              columnDef.valueFormatter = (params) => {
                 return this.resolveMappingFormula(
                   col.displayLabelFormula,
                   params.value
                 );
               };
             }
-            return result;
           }
         }
+
+        // Adicionamos informação sobre o grupo da coluna para processamento posterior
+        return {
+          columnDef,
+          columnGroup: col.columnGroup
+        };
       });
+
+      // Agora vamos organizar as colunas em grupos
+      const columnGroups = {};
+      const finalColumnDefs = [];
+
+      // Percorremos as colunas processadas para organizá-las
+      processedColumns.forEach(({ columnDef, columnGroup }) => {
+        // Se a coluna não pertence a nenhum grupo, adicionamos diretamente ao array final
+        if (columnGroup === "") {
+          finalColumnDefs.push(columnDef);
+          return;
+        }
+
+        // Se o grupo já existe, adicionamos a coluna aos filhos
+        if (columnGroups[columnGroup]) {
+          columnGroups[columnGroup].children.push(columnDef);
+        }
+        // Se o grupo não existe, criamos um novo
+        else {
+          columnGroups[columnGroup] = {
+            headerName: columnGroup,
+            children: [columnDef]
+          };
+          // Adicionamos o novo grupo ao array final
+          finalColumnDefs.push(columnGroups[columnGroup]);
+        }
+      });
+
+      return finalColumnDefs;
     },
     rowSelection() {
       if (this.content.rowSelection === "multiple") {
-        return { mode: "multiRow", checkboxes: true };
+        return {
+          mode: "multiRow",
+          checkboxes: !this.content.disableCheckboxes,
+          headerCheckbox: !this.content.disableCheckboxes,
+          selectAll: this.content.selectAll || "all",
+          enableClickSelection: this.content.enableClickSelection,
+        };
       } else if (this.content.rowSelection === "single") {
-        return { mode: "singleRow", checkboxes: true };
+        return {
+          mode: "singleRow",
+          checkboxes: !this.content.disableCheckboxes,
+          enableClickSelection: this.content.enableClickSelection,
+        };
       } else {
         return {
           mode: "singleRow",
           checkboxes: false,
           isRowSelectable: () => false,
+          enableClickSelection: this.content.enableClickSelection,
         };
       }
     },
@@ -315,12 +417,12 @@ export default {
         ...(this.content.actionFont
           ? { "--ww-data-grid_action-font": this.content.actionFont }
           : {
-              "--ww-data-grid_action-fontSize": this.content.actionFontSize,
-              "--ww-data-grid_action-fontFamily": this.content.actionFontFamily,
-              "--ww-data-grid_action-fontWeight": this.content.actionFontWeight,
-              "--ww-data-grid_action-fontStyle": this.content.actionFontStyle,
-              "--ww-data-grid_action-lineHeight": this.content.actionLineHeight,
-            }),
+            "--ww-data-grid_action-fontSize": this.content.actionFontSize,
+            "--ww-data-grid_action-fontFamily": this.content.actionFontFamily,
+            "--ww-data-grid_action-fontWeight": this.content.actionFontWeight,
+            "--ww-data-grid_action-fontStyle": this.content.actionFontStyle,
+            "--ww-data-grid_action-lineHeight": this.content.actionLineHeight,
+          }),
       };
     },
     theme() {
@@ -346,7 +448,9 @@ export default {
         checkboxCheckedBackgroundColor: this.content.selectionCheckboxColor,
         rangeSelectionBorderColor: this.content.cellSelectionBorderColor,
         checkboxUncheckedBorderColor: this.content.checkboxUncheckedBorderColor,
-        focusShadow: this.content.focusShadow?.length ? this.content.focusShadow : undefined,
+        focusShadow: this.content.focusShadow?.length
+          ? this.content.focusShadow
+          : undefined,
       });
     },
     isEditing() {
@@ -380,15 +484,26 @@ export default {
         },
       });
     },
+    onRowClicked(event) {
+      this.$emit("trigger-event", {
+        name: "rowClicked",
+        event: {
+          row: event.data,
+          id: event.node.id,
+          index: event.node.sourceRowIndex,
+          displayIndex: event.rowIndex,
+        },
+      });
+    },
     /* wwEditor:start */
     generateColumns() {
       this.$emit("update:content", {
         columns: this.rowData?.[0]
           ? Object.keys(this.rowData[0]).map((key) => ({
-              field: key,
-              sortable: true,
-              filter: true,
-            }))
+            field: key,
+            sortable: true,
+            filter: true,
+          }))
           : [],
       });
     },
@@ -418,6 +533,16 @@ export default {
       if (!data || !data[0]) throw new Error("No data found");
       return {
         row: data[0],
+      };
+    },
+    getRowClickedTestEvent() {
+      const data = this.rowData;
+      if (!data || !data[0]) throw new Error("No data found");
+      return {
+        row: data[0],
+        id: 0,
+        index: 0,
+        displayIndex: 0,
       };
     },
     /* wwEditor:end */
@@ -454,6 +579,7 @@ export default {
 <style scoped lang="scss">
 .ww-datagrid {
   position: relative;
+
   /* wwEditor:start */
   &.editing {
     &::before {
@@ -465,6 +591,7 @@ export default {
       z-index: 10;
     }
   }
+
   /* wwEditor:end */
 }
 </style>
