@@ -758,6 +758,7 @@ export default {
                             totalValue: {
                                 label: "Total Value",
                                 type: "Text",
+                                defaultValue: "",
                                 bindable: true,
                                 hidden: array?.item?.cellDataType === "action" ||
                                     array?.item?.cellDataType === "image" ||
@@ -937,7 +938,7 @@ export default {
             type: "OnOff",
             section: "settings",
             bindable: true,
-            defaultValue: false,
+            defaultValue: true,
             /* wwEditor:start */
             bindingValidation: {
                 type: "boolean",

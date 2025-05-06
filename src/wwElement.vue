@@ -4,10 +4,10 @@
       :domLayout="content.layout === 'auto' ? 'autoHeight' : 'normal'" :style="style" :rowSelection="rowSelection"
       :selection-column-def="{ pinned: true }" :theme="theme" :getRowId="getRowId" :pagination="content.pagination"
       :paginationPageSize="content.paginationPageSize || 10" :paginationPageSizeSelector="false"
-      :suppressMovableColumns="!content.movableColumns" :columnHoverHighlight="content.columnHoverHighlight"
-      :locale-text="localeText" @grid-ready="onGridReady" @row-selected="onRowSelected"
-      @selection-changed="onSelectionChanged" @cell-value-changed="onCellValueChanged" @filter-changed="onFilterChanged"
-      @sort-changed="onSortChanged" @row-clicked="onRowClicked">
+      :suppressMovableColumns="!content.movableColumns" :pinnedBottomRowData="pinnedBottomRowData"
+      :columnHoverHighlight="content.columnHoverHighlight" :locale-text="localeText" @grid-ready="onGridReady"
+      @row-selected="onRowSelected" @selection-changed="onSelectionChanged" @cell-value-changed="onCellValueChanged"
+      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-clicked="onRowClicked">
     </ag-grid-vue>
   </div>
 </template>
@@ -86,10 +86,6 @@ export default {
         defaultValue: {},
         readonly: true,
       });
-
-    const onGridReady = (params) => {
-      gridApi.value = params.api;
-    };
 
     watchEffect(() => {
       if (!gridApi.value) return;
@@ -194,6 +190,19 @@ export default {
         editable: false,
         resizable: this.content.resizableColumns,
       };
+    },
+    pinnedBottomRowData() {
+      if (!this.content.showTotalRow) return null;
+
+      const totalRow = {};
+
+      this.content.columns.forEach(column => {
+        if (column.field) {
+          totalRow[column.field] = column.totalValue !== undefined ? column.totalValue : '';
+        }
+      });
+
+      return [totalRow];
     },
     columnDefs() {
       // Primeiro, processamos as colunas normalmente
