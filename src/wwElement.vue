@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { shallowRef, watchEffect, computed } from "vue";
+import { shallowRef, watchEffect, computed, watch } from "vue";
 import { AgGridVue } from "ag-grid-vue3";
 import {
   AllCommunityModule,
@@ -86,6 +86,14 @@ export default {
         defaultValue: {},
         readonly: true,
       });
+    const { value: dataValue, setValue: setData } =
+      wwLib.wwVariable.useComponentVariable({
+        uid: props.uid,
+        name: "data",
+        type: "array",
+        defaultValue: [],
+        readonly: true,
+      });
 
     watchEffect(() => {
       if (!gridApi.value) return;
@@ -99,6 +107,24 @@ export default {
         });
       }
     });
+
+    const onGridReady = (params) => {
+      gridApi.value = params.api;
+      updateDataAfterFilterAndSort();
+    };
+
+    const updateDataAfterFilterAndSort = () => {
+      if (!gridApi.value) return;
+
+      const rowsData = [];
+      gridApi.value.forEachNodeAfterFilterAndSort((node) => {
+        if (node.data) {
+          rowsData.push(node.data);
+        }
+      });
+
+      setData(rowsData);
+    };
 
     const onRowSelected = (event) => {
       const name = event.node.isSelected() ? "rowSelected" : "rowDeselected";
@@ -127,6 +153,7 @@ export default {
           event: filterModel,
         });
       }
+      updateDataAfterFilterAndSort();
     };
 
     const onSortChanged = (event) => {
@@ -142,6 +169,7 @@ export default {
           event: state.sort?.sortModel || [],
         });
       }
+      updateDataAfterFilterAndSort();
     };
 
     /* wwEditor:start */
@@ -153,6 +181,7 @@ export default {
       onGridReady,
       onRowSelected,
       onSelectionChanged,
+      updateDataAfterFilterAndSort,
       gridApi,
       onFilterChanged,
       onSortChanged,
