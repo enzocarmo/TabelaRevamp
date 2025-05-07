@@ -7,7 +7,7 @@
       :suppressMovableColumns="!content.movableColumns" :pinnedBottomRowData="pinnedBottomRowData"
       :columnHoverHighlight="content.columnHoverHighlight" :locale-text="localeText" @grid-ready="onGridReady"
       @row-selected="onRowSelected" @selection-changed="onSelectionChanged" @cell-value-changed="onCellValueChanged"
-      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-clicked="onRowClicked">
+      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-double-clicked="onRowDoubleClicked">
     </ag-grid-vue>
   </div>
 </template>
@@ -30,6 +30,7 @@ import {
 import ActionCellRenderer from "./components/ActionCellRenderer.vue";
 import ImageCellRenderer from "./components/ImageCellRenderer.vue";
 import WewebCellRenderer from "./components/WewebCellRenderer.vue";
+import ComparativeCellRenderer from "./components/ComparativeCellRenderer.vue";
 
 console.log("AG Grid version:", AG_GRID_LOCALE_FR);
 
@@ -43,6 +44,7 @@ export default {
     ActionCellRenderer,
     ImageCellRenderer,
     WewebCellRenderer,
+    ComparativeCellRenderer,
   },
   props: {
     content: {
@@ -113,6 +115,14 @@ export default {
       updateDataAfterFilterAndSort();
     };
 
+    const sizeColumnsToFit = () => {
+      const allColumnIds = [];
+      gridApi.value.getColumns().forEach((column) => {
+        allColumnIds.push(column.getId());
+      });
+      gridApi.value.autoSizeColumns(allColumnIds, false);
+    };
+
     const updateDataAfterFilterAndSort = () => {
       if (!gridApi.value) return;
 
@@ -125,6 +135,16 @@ export default {
 
       setData(rowsData);
     };
+
+    watch(
+      () => props.content.rowData,
+      () => {
+        // Quando content.rowData mudar, atualize imediatamente a variável data
+        const rawData = wwLib.wwUtils.getDataFromCollection(props.content.rowData);
+        setData(Array.isArray(rawData) ? rawData : []);
+      },
+      { immediate: true } // Executa imediatamente ao inicializar o componente
+    );
 
     const onRowSelected = (event) => {
       const name = event.node.isSelected() ? "rowSelected" : "rowDeselected";
@@ -181,6 +201,7 @@ export default {
       onGridReady,
       onRowSelected,
       onSelectionChanged,
+      sizeColumnsToFit,
       updateDataAfterFilterAndSort,
       gridApi,
       onFilterChanged,
@@ -367,6 +388,10 @@ export default {
               editable: col.editable,
             };
 
+            if (col.comparative) {
+              columnDef.cellRenderer = "ComparativeCellRenderer";
+            }
+
             if (col.useCustomLabel) {
               columnDef.valueFormatter = (params) => {
                 return this.resolveMappingFormula(
@@ -522,9 +547,9 @@ export default {
         },
       });
     },
-    onRowClicked(event) {
+    onRowDoubleClicked(event) {
       this.$emit("trigger-event", {
-        name: "rowClicked",
+        name: "rowDoubleClicked",
         event: {
           row: event.data,
           id: event.node.id,
