@@ -21,7 +21,7 @@ export default {
 
 .skeleton-loader {
     height: 14px;
-    background-color: #f0f0f0;
+    background-color: #a19b9d4d;
     border-radius: 2px;
     width: 100%;
     animation: skeleton-wave 1.5s ease-in-out infinite;
@@ -38,7 +38,7 @@ export default {
     bottom: 0;
     background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.4),
+            rgba(255, 255, 255, 0.2),
             transparent);
     animation: skeleton-wave 1.5s ease-in-out 0.5s infinite;
 }
