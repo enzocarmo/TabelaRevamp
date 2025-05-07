@@ -1,6 +1,6 @@
 <template>
   <div class="ww-datagrid" :class="{ editing: isEditing }" :style="cssVars">
-    <ag-grid-vue :rowData="rowData" :columnDefs="columnDefs" :defaultColDef="defaultColDef"
+    <ag-grid-vue :rowData="computedRowData" :columnDefs="columnDefs" :defaultColDef="defaultColDef"
       :domLayout="content.layout === 'auto' ? 'autoHeight' : 'normal'" :style="style" :rowSelection="rowSelection"
       :selection-column-def="{ pinned: true }" :theme="theme" :getRowId="getRowId" :pagination="content.pagination"
       :paginationPageSize="content.paginationPageSize || 10" :paginationPageSizeSelector="false"
@@ -31,6 +31,7 @@ import ActionCellRenderer from "./components/ActionCellRenderer.vue";
 import ImageCellRenderer from "./components/ImageCellRenderer.vue";
 import WewebCellRenderer from "./components/WewebCellRenderer.vue";
 import ComparativeCellRenderer from "./components/ComparativeCellRenderer.vue";
+import SkeletonCellRenderer from "./components/SkeletonCellRenderer.vue";
 
 console.log("AG Grid version:", AG_GRID_LOCALE_FR);
 
@@ -45,6 +46,7 @@ export default {
     ImageCellRenderer,
     WewebCellRenderer,
     ComparativeCellRenderer,
+    SkeletonCellRenderer,
   },
   props: {
     content: {
@@ -235,6 +237,30 @@ export default {
       const data = wwLib.wwUtils.getDataFromCollection(this.content.rowData);
       return Array.isArray(data) ? data ?? [] : [];
     },
+    computedRowData() {
+      if (this.content.loading) {
+        // Gerar 15 linhas de skeleton (ou o número desejado)
+        const skeletonRows = Array(15)
+          .fill()
+          .map((_, index) => {
+            const row = {
+              _isSkeletonRow: true,
+              _skeletonId: `skeleton-${index}` // Propriedade para uso no idFormula caso necessário
+            };
+            // Adicionar um campo para cada coluna
+            this.content.columns.forEach(column => {
+              if (column.field) {
+                row[column.field] = null;
+              }
+            });
+            return row;
+          });
+        return skeletonRows;
+      }
+
+      // Retornar os dados originais quando não estiver carregando
+      return this.rowData;
+    },
     defaultColDef() {
       return {
         editable: false,
@@ -255,6 +281,8 @@ export default {
       return [totalRow];
     },
     columnDefs() {
+      const isLoading = this.content.loading;
+
       // Primeiro, processamos as colunas normalmente
       const processedColumns = this.content.columns.map((col) => {
         const minWidth =
@@ -281,124 +309,135 @@ export default {
 
         let columnDef;
 
-        switch (col.cellDataType) {
-          case "action": {
-            columnDef = {
-              ...commonProperties,
-              headerName: col.headerName,
-              cellRenderer: "ActionCellRenderer",
-              cellRendererParams: {
-                name: col.actionName,
-                label: col.actionLabel,
-                trigger: this.onActionTrigger,
-                withFont: !!this.content.actionFont,
-              },
-              sortable: false,
-              filter: false,
-            };
-            break;
-          }
-          case "custom":
-            columnDef = {
-              ...commonProperties,
-              headerName: col.headerName,
-              field: col.field,
-              cellRenderer: "WewebCellRenderer",
-              cellRendererParams: {
-                containerId: col.containerId,
-              },
-              sortable: col.sortable,
-              filter: col.filter,
-            };
-            break;
-          case "image": {
-            columnDef = {
-              ...commonProperties,
-              headerName: col.headerName,
-              field: col.field,
-              cellRenderer: "ImageCellRenderer",
-              cellRendererParams: {
-                width: col.imageWidth,
-                height: col.imageHeight,
-              },
-            };
-            break;
-          }
-          case "formatted-number": {
-            columnDef = {
-              ...commonProperties,
-              headerName: col.headerName,
-              field: col.field,
-              sortable: col.sortable,
-              filter: col.filter,
-              editable: col.editable,
-              valueFormatter: (params) => {
-                if (params.value === null || params.value === undefined) return '';
-                return Number(params.value).toLocaleString('pt-BR', {
-                  minimumFractionDigits: col.decimalPlaces || 2,
-                  maximumFractionDigits: col.decimalPlaces || 2
-                });
-              }
-            };
-            break;
-          }
-          case "currency": {
-            columnDef = {
-              ...commonProperties,
-              headerName: col.headerName,
-              field: col.field,
-              sortable: col.sortable,
-              filter: col.filter,
-              editable: col.editable,
-              valueFormatter: (params) => {
-                if (params.value === null || params.value === undefined) return '';
-                return `R$ ${Number(params.value).toLocaleString('pt-BR', {
-                  minimumFractionDigits: col.decimalPlaces || 2,
-                  maximumFractionDigits: col.decimalPlaces || 2
-                })}`;
-              }
-            };
-            break;
-          }
-          case "percentage": {
-            columnDef = {
-              ...commonProperties,
-              headerName: col.headerName,
-              field: col.field,
-              sortable: col.sortable,
-              filter: col.filter,
-              editable: col.editable,
-              valueFormatter: (params) => {
-                if (params.value === null || params.value === undefined) return '';
-                return `${Number(params.value).toLocaleString('pt-BR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}%`;
-              }
-            };
-            break;
-          }
-          default: {
-            columnDef = {
-              ...commonProperties,
-              headerName: col.headerName,
-              field: col.field,
-              sortable: col.sortable,
-              filter: col.filter,
-              editable: col.editable,
-            };
-
-            if (col.comparative) {
-              columnDef.cellRenderer = "ComparativeCellRenderer";
-            }
-
-            if (col.useCustomLabel) {
-              columnDef.valueFormatter = (params) => {
-                return this.resolveMappingFormula(
-                  col.displayLabelFormula,
-                  params.value
-                );
+        if (isLoading) {
+          columnDef = {
+            ...commonProperties,
+            headerName: col.headerName,
+            field: col.field,
+            cellRenderer: "SkeletonCellRenderer",
+            sortable: false,
+            filter: false,
+          };
+        } else {
+          switch (col.cellDataType) {
+            case "action": {
+              columnDef = {
+                ...commonProperties,
+                headerName: col.headerName,
+                cellRenderer: "ActionCellRenderer",
+                cellRendererParams: {
+                  name: col.actionName,
+                  label: col.actionLabel,
+                  trigger: this.onActionTrigger,
+                  withFont: !!this.content.actionFont,
+                },
+                sortable: false,
+                filter: false,
               };
+              break;
+            }
+            case "custom":
+              columnDef = {
+                ...commonProperties,
+                headerName: col.headerName,
+                field: col.field,
+                cellRenderer: "WewebCellRenderer",
+                cellRendererParams: {
+                  containerId: col.containerId,
+                },
+                sortable: col.sortable,
+                filter: col.filter,
+              };
+              break;
+            case "image": {
+              columnDef = {
+                ...commonProperties,
+                headerName: col.headerName,
+                field: col.field,
+                cellRenderer: "ImageCellRenderer",
+                cellRendererParams: {
+                  width: col.imageWidth,
+                  height: col.imageHeight,
+                },
+              };
+              break;
+            }
+            case "formatted-number": {
+              columnDef = {
+                ...commonProperties,
+                headerName: col.headerName,
+                field: col.field,
+                sortable: col.sortable,
+                filter: col.filter,
+                editable: col.editable,
+                valueFormatter: (params) => {
+                  if (params.value === null || params.value === undefined) return '';
+                  return Number(params.value).toLocaleString('pt-BR', {
+                    minimumFractionDigits: col.decimalPlaces || 2,
+                    maximumFractionDigits: col.decimalPlaces || 2
+                  });
+                }
+              };
+              break;
+            }
+            case "currency": {
+              columnDef = {
+                ...commonProperties,
+                headerName: col.headerName,
+                field: col.field,
+                sortable: col.sortable,
+                filter: col.filter,
+                editable: col.editable,
+                valueFormatter: (params) => {
+                  if (params.value === null || params.value === undefined) return '';
+                  return `R$ ${Number(params.value).toLocaleString('pt-BR', {
+                    minimumFractionDigits: col.decimalPlaces || 2,
+                    maximumFractionDigits: col.decimalPlaces || 2
+                  })}`;
+                }
+              };
+              break;
+            }
+            case "percentage": {
+              columnDef = {
+                ...commonProperties,
+                headerName: col.headerName,
+                field: col.field,
+                sortable: col.sortable,
+                filter: col.filter,
+                editable: col.editable,
+                valueFormatter: (params) => {
+                  if (params.value === null || params.value === undefined) return '';
+                  return `${Number(params.value).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}%`;
+                }
+              };
+              break;
+            }
+            default: {
+              columnDef = {
+                ...commonProperties,
+                headerName: col.headerName,
+                field: col.field,
+                sortable: col.sortable,
+                filter: col.filter,
+                editable: col.editable,
+              };
+
+              if (col.comparative) {
+                columnDef.cellRenderer = "ComparativeCellRenderer";
+              }
+
+              if (col.useCustomLabel) {
+                columnDef.valueFormatter = (params) => {
+                  return this.resolveMappingFormula(
+                    col.displayLabelFormula,
+                    params.value
+                  );
+                };
+              }
             }
           }
         }
@@ -528,6 +567,9 @@ export default {
   },
   methods: {
     getRowId(params) {
+      if (params.data?._isSkeletonRow) {
+        return params.data._skeletonId;
+      }
       return this.resolveMappingFormula(this.content.idFormula, params.data);
     },
     onActionTrigger(event) {

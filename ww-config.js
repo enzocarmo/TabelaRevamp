@@ -787,6 +787,7 @@ export default {
       type: "OnOff",
       bindable: true,
       defaultValue: false,
+      section: "settings",
     },
     generateColumns: {
       type: "Button",
