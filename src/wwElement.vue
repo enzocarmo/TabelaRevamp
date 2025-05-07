@@ -681,7 +681,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .ww-datagrid {
   position: relative;
 
@@ -698,5 +698,9 @@ export default {
   }
 
   /* wwEditor:end */
+}
+
+.ag-cell {
+  font-weight: 600;
 }
 </style>
