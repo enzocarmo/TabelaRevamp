@@ -378,6 +378,11 @@ export default {
                   });
                 }
               };
+
+              if (col.comparative) {
+                columnDef.cellRenderer = "ComparativeCellRenderer";
+              }
+
               break;
             }
             case "currency": {
@@ -396,6 +401,11 @@ export default {
                   })}`;
                 }
               };
+
+              if (col.comparative) {
+                columnDef.cellRenderer = "ComparativeCellRenderer";
+              }
+
               break;
             }
             case "percentage": {
@@ -414,6 +424,11 @@ export default {
                   })}%`;
                 }
               };
+
+              if (col.comparative) {
+                columnDef.cellRenderer = "ComparativeCellRenderer";
+              }
+
               break;
             }
             default: {
