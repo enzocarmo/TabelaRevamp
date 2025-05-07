@@ -1004,6 +1004,15 @@ export default {
                   ],
                 },
               },
+              hide: {
+                label: "Hidden",
+                type: "OnOff",
+                bindable: true,
+                bindingValidation: {
+                  type: "boolean",
+                  tooltip: "True to hide the column",
+                },
+              },
               editable: {
                 label: "Editable",
                 type: "OnOff",
