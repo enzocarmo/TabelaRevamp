@@ -1,6 +1,6 @@
 {
-    "name": "ag-grid-table",
-    "version": "1.3.6",
+    "name": "tabelarevamp",
+    "version": "1.0.0",
     "scripts": {
         "build": "weweb build",
         "serve": "weweb serve"

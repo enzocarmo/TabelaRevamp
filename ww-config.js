@@ -1,7 +1,7 @@
 export default {
   editor: {
     label: {
-      en: "Datagrid",
+      en: "TabelaRevamp",
     },
     icon: "table",
     customStylePropertiesOrder: [
