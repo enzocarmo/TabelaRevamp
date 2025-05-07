@@ -417,10 +417,6 @@ export default {
               break;
             }
             default: {
-              if (col.comparative) {
-                columnDef.cellRenderer = "ComparativeCellRenderer";
-              }
-
               columnDef = {
                 ...commonProperties,
                 headerName: col.headerName,
@@ -429,6 +425,10 @@ export default {
                 filter: col.filter,
                 editable: col.editable,
               };
+
+              if (col.comparative) {
+                columnDef.cellRenderer = "ComparativeCellRenderer";
+              }
 
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
