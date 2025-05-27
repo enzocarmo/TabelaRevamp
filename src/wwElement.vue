@@ -369,6 +369,10 @@ export default {
                 field: col.field,
                 sortable: col.sortable,
                 filter: col.filter,
+                filterParams: {
+                maxNumConditions: 60,
+                defaultJoinOperator: 'AND'
+                },
                 editable: col.editable,
                 valueFormatter: (params) => {
                   if (params.value === null || params.value === undefined) return '';
@@ -392,6 +396,10 @@ export default {
                 field: col.field,
                 sortable: col.sortable,
                 filter: col.filter,
+                filterParams: {
+                maxNumConditions: 60,
+                defaultJoinOperator: 'AND'
+                },
                 editable: col.editable,
                 valueFormatter: (params) => {
                   if (params.value === null || params.value === undefined) return '';
@@ -415,6 +423,10 @@ export default {
                 field: col.field,
                 sortable: col.sortable,
                 filter: col.filter,
+                filterParams: {
+                maxNumConditions: 60,
+                defaultJoinOperator: 'AND'
+                },
                 editable: col.editable,
                 valueFormatter: (params) => {
                   if (params.value === null || params.value === undefined) return '';
@@ -438,6 +450,10 @@ export default {
                 field: col.field,
                 sortable: col.sortable,
                 filter: col.filter,
+                filterParams: {
+                maxNumConditions: 60,
+                defaultJoinOperator: 'AND'
+                },
                 editable: col.editable,
               };
 
