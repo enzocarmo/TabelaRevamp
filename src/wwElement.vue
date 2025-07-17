@@ -542,12 +542,15 @@ export default {
     },
     cssVars() {
       return {
-        "--ww-data-grid_action-backgroundColor":
-          this.content.actionBackgroundColor,
+        "--ww-data-grid_action-backgroundColor": this.content.actionBackgroundColor,
         "--ww-data-grid_action-color": this.content.actionColor,
         "--ww-data-grid_action-padding": this.content.actionPadding,
         "--ww-data-grid_action-border": this.content.actionBorder,
         "--ww-data-grid_action-borderRadius": this.content.actionBorderRadius,
+        // Variáveis para input de edição
+        "--ww-data-grid_edit-input-border-color": this.content.editInputBorderColor,
+        "--ww-data-grid_edit-input-font-family": this.content.editInputFontFamily,
+        "--ww-data-grid_edit-input-font-weight": this.content.editInputFontWeight,
         ...(this.content.actionFont
           ? { "--ww-data-grid_action-font": this.content.actionFont }
           : {
@@ -585,6 +588,10 @@ export default {
         focusShadow: this.content.focusShadow?.length
           ? this.content.focusShadow
           : undefined,
+        // Novas propriedades para input de edição
+        inputBorderColor: this.content.editInputBorderColor,
+        inputFontFamily: this.content.editInputFontFamily,
+        inputFontWeight: this.content.editInputFontWeight,
       });
     },
     isEditing() {
@@ -734,5 +741,31 @@ export default {
 
 .ag-cell {
   font-weight: 600;
+}
+
+// Estilos globais para inputs de edição - mais agressivos
+.ww-datagrid {
+  input {
+    &[class*="ag-"] {
+      border-color: var(--ww-data-grid_edit-input-border-color) !important;
+      font-family: var(--ww-data-grid_edit-input-font-family) !important;
+      font-weight: var(--ww-data-grid_edit-input-font-weight) !important;
+    }
+  }
+
+  // Força aplicação em todos os inputs dentro do grid
+  :deep(input) {
+    border-color: var(--ww-data-grid_edit-input-border-color) !important;
+    font-family: var(--ww-data-grid_edit-input-font-family) !important;
+    font-weight: var(--ww-data-grid_edit-input-font-weight) !important;
+  }
+}
+
+// Estilos globais ainda mais específicos
+.ag-theme-quartz input,
+.ag-theme-quartz-dark input {
+  border-color: var(--ww-data-grid_edit-input-border-color) !important;
+  font-family: var(--ww-data-grid_edit-input-font-family) !important;
+  font-weight: var(--ww-data-grid_edit-input-font-weight) !important;
 }
 </style>
