@@ -7,7 +7,7 @@
       :suppressMovableColumns="!content.movableColumns" :pinnedBottomRowData="pinnedBottomRowData"
       :columnHoverHighlight="content.columnHoverHighlight" :singleClickEdit="true" :locale-text="localeText" @grid-ready="onGridReady"
       @row-selected="onRowSelected" @selection-changed="onSelectionChanged" @cell-value-changed="onCellValueChanged"
-      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-double-clicked="onRowDoubleClicked">
+      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-double-clicked="onRowDoubleClicked" @cell-double-clicked="onCellDoubleClicked">
     </ag-grid-vue>
   </div>
 </template>
@@ -628,6 +628,18 @@ export default {
           id: event.node.id,
           index: event.node.sourceRowIndex,
           displayIndex: event.rowIndex,
+        },
+      });
+    },
+    onCellDoubleClicked(event) {
+      this.$emit("trigger-event", {
+        name: "cellDoubleClicked",
+        event: {
+          row: event.data,
+          id: event.node.id,
+          index: event.node.sourceRowIndex,
+          displayIndex: event.rowIndex,
+          columnId: event.column.getColId(),
         },
       });
     },
