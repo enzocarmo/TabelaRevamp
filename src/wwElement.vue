@@ -5,7 +5,7 @@
       :selection-column-def="{ pinned: true }" :theme="theme" :getRowId="getRowId" :pagination="content.pagination"
       :paginationPageSize="content.paginationPageSize || 10" :paginationPageSizeSelector="false"
       :suppressMovableColumns="!content.movableColumns" :pinnedBottomRowData="pinnedBottomRowData"
-      :columnHoverHighlight="content.columnHoverHighlight" :locale-text="localeText" @grid-ready="onGridReady"
+      :columnHoverHighlight="content.columnHoverHighlight" :singleClickEdit="true" :locale-text="localeText" @grid-ready="onGridReady"
       @row-selected="onRowSelected" @selection-changed="onSelectionChanged" @cell-value-changed="onCellValueChanged"
       @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-double-clicked="onRowDoubleClicked">
     </ag-grid-vue>
