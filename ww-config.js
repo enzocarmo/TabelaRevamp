@@ -112,11 +112,30 @@ export default {
         displayIndex: 0,
       },
     },
+    {
+      name: "cellDoubleClicked",
+      label: { en: "On Cell Double Clicked" },
+      event: {
+        value: null,
+        columnId: "id",
+        field: "field",
+        row: null,
+        id: 0,
+        rowIndex: 0,
+        displayRowIndex: 0,
+        columnIndex: 0,
+      },
+    },
   ],
   actions: [
     {
       label: "Size Columns To Fit",
       action: "sizeColumnsToFit",
+      args: [],
+    },
+    {
+      label: "Stop Editing",
+      action: "stopEditing",
       args: [],
     },
   ],
@@ -1002,10 +1021,7 @@ export default {
                 label: "Display value",
                 type: "Formula",
                 options: {
-                  template: _.get(
-                    wwLib.wwUtils.getDataFromCollection(content.rowData)?.[0],
-                    array?.item?.field
-                  ),
+                  template: wwLib.wwUtils.getDataFromCollection(content.rowData)?.[0],
                 },
                 hidden:
                   array?.item?.cellDataType === "action" ||

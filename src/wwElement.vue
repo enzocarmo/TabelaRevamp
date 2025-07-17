@@ -7,8 +7,8 @@
       :suppressMovableColumns="!content.movableColumns" :pinnedBottomRowData="pinnedBottomRowData"
       :columnHoverHighlight="content.columnHoverHighlight" :singleClickEdit="true" :locale-text="localeText"
       @grid-ready="onGridReady" @row-selected="onRowSelected" @selection-changed="onSelectionChanged"
-      @cell-value-changed="onCellValueChanged" @filter-changed="onFilterChanged" @sort-changed="onSortChanged"
-      @row-double-clicked="onRowDoubleClicked">
+      @cell-value-changed="onCellValueChanged" @cell-double-clicked="onCellDoubleClicked"
+      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-double-clicked="onRowDoubleClicked">
     </ag-grid-vue>
   </div>
 </template>
@@ -195,6 +195,19 @@ export default {
       updateDataAfterFilterAndSort();
     };
 
+    const stopEditing = () => {
+      if (!gridApi.value) return false;
+
+      const editingCells = gridApi.value.getEditingCells();
+
+      if (editingCells && editingCells.length > 0) {
+        gridApi.value.stopEditing();
+        return true;
+      }
+
+      return false;
+    };
+
     /* wwEditor:start */
     const { createElement } = wwLib.useCreateElement();
     /* wwEditor:end */
@@ -208,6 +221,7 @@ export default {
       updateDataAfterFilterAndSort,
       gridApi,
       onFilterChanged,
+      stopEditing,
       onSortChanged,
       localeText: computed(() => {
         switch (props.content.lang) {
@@ -466,7 +480,7 @@ export default {
                 columnDef.valueFormatter = (params) => {
                   return this.resolveMappingFormula(
                     col.displayLabelFormula,
-                    params.value
+                    params.data
                   );
                 };
               }
@@ -625,6 +639,21 @@ export default {
           newValue: event.newValue,
           columnId: event.column.getColId(),
           row: event.data,
+        },
+      });
+    },
+    onCellDoubleClicked(event) {
+      this.$emit("trigger-event", {
+        name: "cellDoubleClicked",
+        event: {
+          value: event.value,
+          columnId: event.column.getColId(),
+          field: event.column.getColDef().field,
+          row: event.data,
+          id: event.node.id,
+          rowIndex: event.node.sourceRowIndex,
+          displayRowIndex: event.rowIndex,
+          columnIndex: event.columnApi ? event.columnApi.getDisplayedColumns().indexOf(event.column) : null,
         },
       });
     },
