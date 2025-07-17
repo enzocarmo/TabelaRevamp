@@ -150,6 +150,16 @@ export default {
           if (gridApi.value) {
             gridApi.value.refreshCells({ force: true });
             gridApi.value.redrawRows();
+
+            // Segundo refresh para estilos após pequeno delay
+            setTimeout(() => {
+              if (gridApi.value) {
+                gridApi.value.refreshCells({
+                  force: true,
+                  suppressFlash: true
+                });
+              }
+            }, 50);
           }
         }, 0);
       },
@@ -212,6 +222,15 @@ export default {
       gridApi.value.redrawRows();
     };
 
+    const forceStyleRefresh = () => {
+      if (!gridApi.value) return;
+
+      gridApi.value.refreshCells({
+        force: true,
+        suppressFlash: true
+      });
+    };
+
     const stopEditing = () => {
       if (!gridApi.value) return false;
 
@@ -238,6 +257,7 @@ export default {
       updateDataAfterFilterAndSort,
       gridApi,
       forceGridRefresh,
+      forceStyleRefresh,
       onFilterChanged,
       stopEditing,
       onSortChanged,
@@ -513,18 +533,31 @@ export default {
                       params.data
                     );
 
-                    if (colorResult) {
-                      if (typeof colorResult === 'string') {
-                        return { backgroundColor: colorResult };
-                      }
-                      if (typeof colorResult === 'object') {
-                        return colorResult;
-                      }
+                    if (!colorResult) return null;
+
+                    let finalStyle = {};
+
+                    if (typeof colorResult === 'string') {
+                      finalStyle.backgroundColor = colorResult;
+                    } else if (typeof colorResult === 'object') {
+                      finalStyle = { ...colorResult };
                     }
+
+                    // Remove cores neutras para preservar alternate color
+                    if (finalStyle.backgroundColor &&
+                      (finalStyle.backgroundColor === '#ffffff' ||
+                        finalStyle.backgroundColor === 'white' ||
+                        finalStyle.backgroundColor === '' ||
+                        finalStyle.backgroundColor === 'transparent')) {
+                      delete finalStyle.backgroundColor;
+                    }
+
+                    return Object.keys(finalStyle).length > 0 ? finalStyle : null;
+
                   } catch (error) {
                     console.warn('Error resolving cell color formula:', error);
+                    return null;
                   }
-                  return null;
                 };
               }
             }
