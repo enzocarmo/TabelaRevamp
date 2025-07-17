@@ -141,12 +141,22 @@ export default {
 
     watch(
       () => props.content.rowData,
-      () => {
-        // Quando content.rowData mudar, atualize imediatamente a variável data
-        const rawData = wwLib.wwUtils.getDataFromCollection(props.content.rowData);
+      (newData, oldData) => {
+        const rawData = wwLib.wwUtils.getDataFromCollection(newData);
         setData(Array.isArray(rawData) ? rawData : []);
+
+        // Força refresh do grid após mudança nos dados
+        setTimeout(() => {
+          if (gridApi.value) {
+            gridApi.value.refreshCells({ force: true });
+            gridApi.value.redrawRows();
+          }
+        }, 0);
       },
-      { immediate: true } // Executa imediatamente ao inicializar o componente
+      {
+        immediate: true,
+        deep: true // CRUCIAL: Detecta mudanças internas nos objetos
+      }
     );
 
     const onRowSelected = (event) => {
@@ -195,6 +205,13 @@ export default {
       updateDataAfterFilterAndSort();
     };
 
+    const forceGridRefresh = () => {
+      if (!gridApi.value) return;
+
+      gridApi.value.refreshCells({ force: true });
+      gridApi.value.redrawRows();
+    };
+
     const stopEditing = () => {
       if (!gridApi.value) return false;
 
@@ -220,6 +237,7 @@ export default {
       sizeColumnsToFit,
       updateDataAfterFilterAndSort,
       gridApi,
+      forceGridRefresh,
       onFilterChanged,
       stopEditing,
       onSortChanged,
@@ -254,15 +272,13 @@ export default {
     },
     computedRowData() {
       if (this.content.loading) {
-        // Gerar 15 linhas de skeleton (ou o número desejado)
         const skeletonRows = Array(15)
           .fill()
           .map((_, index) => {
             const row = {
               _isSkeletonRow: true,
-              _skeletonId: `skeleton-${index}` // Propriedade para uso no idFormula caso necessário
+              _skeletonId: `skeleton-${index}`
             };
-            // Adicionar um campo para cada coluna
             this.content.columns.forEach(column => {
               if (column.field) {
                 row[column.field] = null;
@@ -273,8 +289,12 @@ export default {
         return skeletonRows;
       }
 
-      // Retornar os dados originais quando não estiver carregando
-      return this.rowData;
+      // MUDANÇA PRINCIPAL: Força reatividade criando novos objetos
+      const data = this.rowData;
+      return data.map((row, index) => ({
+        ...row,
+        _reactiveKey: `${Date.now()}-${index}`
+      }));
     },
     defaultColDef() {
       return {
