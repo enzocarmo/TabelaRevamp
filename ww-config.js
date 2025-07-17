@@ -1021,12 +1021,40 @@ export default {
                 label: "Display value",
                 type: "Formula",
                 options: {
-                  template: wwLib.wwUtils.getDataFromCollection(content.rowData)?.[0],
+                  template: wwLib.wwUtils.getDataFromCollection(
+                    content.rowData
+                  )?.[0],
                 },
                 hidden:
                   array?.item?.cellDataType === "action" ||
                   array?.item?.cellDataType === "image" ||
                   !array?.item?.useCustomLabel ||
+                  array?.item?.cellDataType === "custom",
+              },
+              useCustomCellColor: {
+                label: "Custom cell color",
+                type: "OnOff",
+                hidden:
+                  array?.item?.cellDataType === "action" ||
+                  array?.item?.cellDataType === "image" ||
+                  array?.item?.cellDataType === "custom",
+              },
+              cellColorFormula: {
+                label: "Cell color formula",
+                type: "Formula",
+                options: {
+                  template: wwLib.wwUtils.getDataFromCollection(
+                    content.rowData
+                  )?.[0],
+                },
+                propertyHelp: {
+                  tooltip:
+                    "Formula que retorna uma cor CSS ou objeto com propriedades de estilo",
+                },
+                hidden:
+                  array?.item?.cellDataType === "action" ||
+                  array?.item?.cellDataType === "image" ||
+                  !array?.item?.useCustomCellColor ||
                   array?.item?.cellDataType === "custom",
               },
               widthAlgo: {

@@ -504,6 +504,29 @@ export default {
                   );
                 };
               }
+
+              if (col.useCustomCellColor) {
+                columnDef.cellStyle = (params) => {
+                  try {
+                    const colorResult = this.resolveMappingFormula(
+                      col.cellColorFormula,
+                      params.data
+                    );
+
+                    if (colorResult) {
+                      if (typeof colorResult === 'string') {
+                        return { backgroundColor: colorResult };
+                      }
+                      if (typeof colorResult === 'object') {
+                        return colorResult;
+                      }
+                    }
+                  } catch (error) {
+                    console.warn('Error resolving cell color formula:', error);
+                  }
+                  return null;
+                };
+              }
             }
           }
         }
