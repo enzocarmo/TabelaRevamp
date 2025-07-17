@@ -102,7 +102,7 @@ export default {
     },
     {
       name: "cellDoubleClicked",
-      label: { en: "On Row Double Clicked" },
+      label: { en: "On Cell Double Clicked" },
     },
   ],
   actions: [

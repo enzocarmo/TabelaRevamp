@@ -639,7 +639,6 @@ export default {
           id: event.node.id,
           index: event.node.sourceRowIndex,
           displayIndex: event.rowIndex,
-          columnId: event.column.getColId(),
         },
       });
     },
