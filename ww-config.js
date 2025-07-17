@@ -106,18 +106,6 @@ export default {
         displayIndex: 0,
       },
     },
-    {
-      name: "cellDoubleClicked",
-      label: { en: "On Cell Double Clicked" },
-      event: {
-        row: null,
-        id: 0,
-        index: 0,
-        displayIndex: 0,
-        columnId: "columnId",
-        value: null,
-      },
-    },
   ],
   actions: [
     {
