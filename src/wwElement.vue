@@ -705,40 +705,6 @@ export default {
         },
       });
     },
-    forceColorRefresh() {
-      if (!this.gridApi) {
-        return false;
-      }
-
-      try {
-        // Verifica se há colunas com cor customizada
-        const hasCustomColors = this.content.columns.some(col => col.useCustomCellColor);
-
-        if (!hasCustomColors) {
-          return false;
-        }
-
-        // Força refresh de todas as células
-        this.gridApi.refreshCells({
-          force: true,
-          suppressFlash: true
-        });
-
-        // Segundo refresh após pequeno delay para garantir aplicação
-        setTimeout(() => {
-          if (this.gridApi) {
-            this.gridApi.refreshCells({
-              force: true,
-              suppressFlash: true
-            });
-          }
-        }, 50);
-        return true;
-
-      } catch (error) {
-        return false;
-      }
-    },
     onCellDoubleClicked(event) {
       this.$emit("trigger-event", {
         name: "cellDoubleClicked",
@@ -759,6 +725,11 @@ export default {
 
       columnDef.cellStyle = (params) => {
         try {
+          // CORREÇÃO 1: Verificar se é linha de total
+          if (params.node && params.node.rowPinned === 'bottom') {
+            return null;
+          }
+
           // Verificar se é skeleton row
           if (params.data?._isSkeletonRow) {
             return null;

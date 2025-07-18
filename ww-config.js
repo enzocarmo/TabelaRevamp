@@ -138,11 +138,6 @@ export default {
       action: "stopEditing",
       args: [],
     },
-    {
-      label: "Force Color Refresh",
-      action: "forceColorRefresh",
-      args: [],
-    },
   ],
   properties: {
     headerTitle: {
