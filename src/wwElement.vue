@@ -151,15 +151,30 @@ export default {
             gridApi.value.refreshCells({ force: true });
             gridApi.value.redrawRows();
 
-            // Segundo refresh para estilos após pequeno delay
-            setTimeout(() => {
-              if (gridApi.value) {
-                gridApi.value.refreshCells({
-                  force: true,
-                  suppressFlash: true
-                });
-              }
-            }, 50);
+            // Verifica se há colunas com cor customizada
+            const hasCustomColors = props.content.columns.some(col => col.useCustomCellColor);
+
+            if (hasCustomColors) {
+              // Primeiro refresh para estilos após pequeno delay
+              setTimeout(() => {
+                if (gridApi.value) {
+                  gridApi.value.refreshCells({
+                    force: true,
+                    suppressFlash: true
+                  });
+                }
+              }, 50);
+
+              // Segundo refresh para garantir aplicação das cores
+              setTimeout(() => {
+                if (gridApi.value) {
+                  gridApi.value.refreshCells({
+                    force: true,
+                    suppressFlash: true
+                  });
+                }
+              }, 100);
+            }
           }
         }, 0);
       },
@@ -521,7 +536,7 @@ export default {
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
-              
+
               this.applyCustomCellColor(columnDef, col);
 
               if (col.useCustomLabel) {
