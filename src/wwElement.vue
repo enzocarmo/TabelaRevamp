@@ -139,6 +139,37 @@ export default {
       setData(rowsData);
     };
 
+    const forceColorRefresh = () => {
+      if (!gridApi.value) return;
+
+      // Verifica se há colunas com cor customizada
+      const hasCustomColors = props.content.columns.some(col => col.useCustomCellColor);
+
+      if (!hasCustomColors) return;
+
+      // Força atualização dos dados primeiro
+      gridApi.value.setGridOption('rowData', computedRowData.value);
+
+      // Múltiplos refreshes para garantir que as cores sejam aplicadas
+      setTimeout(() => {
+        if (gridApi.value) {
+          gridApi.value.refreshCells({
+            force: true,
+            suppressFlash: true
+          });
+        }
+      }, 10);
+
+      setTimeout(() => {
+        if (gridApi.value) {
+          gridApi.value.refreshCells({
+            force: true,
+            suppressFlash: true
+          });
+        }
+      }, 50);
+    };
+
     watch(
       () => props.content.rowData,
       (newData, oldData) => {
@@ -148,39 +179,26 @@ export default {
         // Força refresh do grid após mudança nos dados
         setTimeout(() => {
           if (gridApi.value) {
-            gridApi.value.refreshCells({ force: true });
-            gridApi.value.redrawRows();
+            // MUDANÇA: Usar setGridOption para garantir que o AG Grid detecte a mudança
+            gridApi.value.setGridOption('rowData', computedRowData.value);
 
             // Verifica se há colunas com cor customizada
             const hasCustomColors = props.content.columns.some(col => col.useCustomCellColor);
 
             if (hasCustomColors) {
-              // Primeiro refresh para estilos após pequeno delay
-              setTimeout(() => {
-                if (gridApi.value) {
-                  gridApi.value.refreshCells({
-                    force: true,
-                    suppressFlash: true
-                  });
-                }
-              }, 50);
-
-              // Segundo refresh para garantir aplicação das cores
-              setTimeout(() => {
-                if (gridApi.value) {
-                  gridApi.value.refreshCells({
-                    force: true,
-                    suppressFlash: true
-                  });
-                }
-              }, 100);
+              // Chama o método específico para atualizar cores
+              forceColorRefresh();
+            } else {
+              // Refresh normal para outras situações
+              gridApi.value.refreshCells({ force: true });
+              gridApi.value.redrawRows();
             }
           }
         }, 0);
       },
       {
         immediate: true,
-        deep: true // CRUCIAL: Detecta mudanças internas nos objetos
+        deep: true // Detecta mudanças internas nos objetos
       }
     );
 
@@ -269,6 +287,7 @@ export default {
       onRowSelected,
       onSelectionChanged,
       sizeColumnsToFit,
+      forceColorRefresh,
       updateDataAfterFilterAndSort,
       gridApi,
       forceGridRefresh,
@@ -725,7 +744,7 @@ export default {
 
       columnDef.cellStyle = (params) => {
         try {
-          // CORREÇÃO 1: Verificar se é linha de total
+          // Verificar se é linha de total
           if (params.node && params.node.rowPinned === 'bottom') {
             return null;
           }
@@ -735,9 +754,12 @@ export default {
             return null;
           }
 
+          // ADIÇÃO: Forçar recálculo usando dados mais atuais
+          const currentData = params.node.data;
+
           const colorResult = this.resolveMappingFormula(
             col.cellColorFormula,
-            params.data
+            currentData
           );
 
           if (!colorResult) return null;
@@ -765,6 +787,15 @@ export default {
           console.warn('Error resolving cell color formula:', error);
           return null;
         }
+      };
+
+      // ADIÇÃO: Força recálculo quando os dados mudam
+      columnDef.cellStyleClass = (params) => {
+        // Retorna uma classe baseada no valor atual para forçar recálculo
+        if (params.data?._isSkeletonRow) return null;
+
+        const timestamp = params.data?._reactiveKey || Date.now();
+        return `cell-style-${timestamp}`;
       };
     },
     onRowDoubleClicked(event) {
