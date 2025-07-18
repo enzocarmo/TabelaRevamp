@@ -442,6 +442,8 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
+              this.applyCustomCellColor(columnDef, col);
+
               break;
             }
             case "currency": {
@@ -468,6 +470,8 @@ export default {
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
+
+              this.applyCustomCellColor(columnDef, col);
 
               break;
             }
@@ -496,6 +500,8 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
+              this.applyCustomCellColor(columnDef, col);
+
               break;
             }
             default: {
@@ -515,6 +521,8 @@ export default {
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
+              
+              this.applyCustomCellColor(columnDef, col);
 
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
@@ -522,42 +530,6 @@ export default {
                     col.displayLabelFormula,
                     params.data
                   );
-                };
-              }
-
-              if (col.useCustomCellColor) {
-                columnDef.cellStyle = (params) => {
-                  try {
-                    const colorResult = this.resolveMappingFormula(
-                      col.cellColorFormula,
-                      params.data
-                    );
-
-                    if (!colorResult) return null;
-
-                    let finalStyle = {};
-
-                    if (typeof colorResult === 'string') {
-                      finalStyle.backgroundColor = colorResult;
-                    } else if (typeof colorResult === 'object') {
-                      finalStyle = { ...colorResult };
-                    }
-
-                    // Remove cores neutras para preservar alternate color
-                    if (finalStyle.backgroundColor &&
-                      (finalStyle.backgroundColor === '#ffffff' ||
-                        finalStyle.backgroundColor === 'white' ||
-                        finalStyle.backgroundColor === '' ||
-                        finalStyle.backgroundColor === 'transparent')) {
-                      delete finalStyle.backgroundColor;
-                    }
-
-                    return Object.keys(finalStyle).length > 0 ? finalStyle : null;
-
-                  } catch (error) {
-                    console.warn('Error resolving cell color formula:', error);
-                    return null;
-                  }
                 };
               }
             }
@@ -732,6 +704,43 @@ export default {
           columnIndex: event.columnApi ? event.columnApi.getDisplayedColumns().indexOf(event.column) : null,
         },
       });
+    },
+    applyCustomCellColor(columnDef, col) {
+      if (!col.useCustomCellColor) return;
+
+      columnDef.cellStyle = (params) => {
+        try {
+          const colorResult = this.resolveMappingFormula(
+            col.cellColorFormula,
+            params.data
+          );
+
+          if (!colorResult) return null;
+
+          let finalStyle = {};
+
+          if (typeof colorResult === 'string') {
+            finalStyle.backgroundColor = colorResult;
+          } else if (typeof colorResult === 'object') {
+            finalStyle = { ...colorResult };
+          }
+
+          // Remove cores neutras para preservar alternate color
+          if (finalStyle.backgroundColor &&
+            (finalStyle.backgroundColor === '#ffffff' ||
+              finalStyle.backgroundColor === 'white' ||
+              finalStyle.backgroundColor === '' ||
+              finalStyle.backgroundColor === 'transparent')) {
+            delete finalStyle.backgroundColor;
+          }
+
+          return Object.keys(finalStyle).length > 0 ? finalStyle : null;
+
+        } catch (error) {
+          console.warn('Error resolving cell color formula:', error);
+          return null;
+        }
+      };
     },
     onRowDoubleClicked(event) {
       this.$emit("trigger-event", {
