@@ -147,9 +147,6 @@ export default {
 
       if (!hasCustomColors) return;
 
-      // Força atualização dos dados primeiro
-      gridApi.value.setGridOption('rowData', computedRowData.value);
-
       // Múltiplos refreshes para garantir que as cores sejam aplicadas
       setTimeout(() => {
         if (gridApi.value) {
@@ -179,8 +176,9 @@ export default {
         // Força refresh do grid após mudança nos dados
         setTimeout(() => {
           if (gridApi.value) {
-            // MUDANÇA: Usar setGridOption para garantir que o AG Grid detecte a mudança
-            gridApi.value.setGridOption('rowData', computedRowData.value);
+            // Força refresh completo
+            gridApi.value.refreshCells({ force: true });
+            gridApi.value.redrawRows();
 
             // Verifica se há colunas com cor customizada
             const hasCustomColors = props.content.columns.some(col => col.useCustomCellColor);
@@ -188,10 +186,6 @@ export default {
             if (hasCustomColors) {
               // Chama o método específico para atualizar cores
               forceColorRefresh();
-            } else {
-              // Refresh normal para outras situações
-              gridApi.value.refreshCells({ force: true });
-              gridApi.value.redrawRows();
             }
           }
         }, 0);
