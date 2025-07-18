@@ -759,11 +759,6 @@ export default {
 
       columnDef.cellStyle = (params) => {
         try {
-          // CORREÇÃO 1: Verificar se é linha de total
-          if (params.node && params.node.rowPinned === 'bottom') {
-            return null;
-          }
-
           // Verificar se é skeleton row
           if (params.data?._isSkeletonRow) {
             return null;
