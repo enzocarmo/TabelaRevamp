@@ -429,11 +429,12 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
-              // Adicionar cellClassRules para backup
               if (col.backup && col.field) {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
+                    // Não aplicar backup na linha de total (pinned bottom)
+                    if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
                     return currentValue !== backupValue;
@@ -468,11 +469,12 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
-              // Adicionar cellClassRules para backup
               if (col.backup && col.field) {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
+                    // Não aplicar backup na linha de total (pinned bottom)
+                    if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
                     return currentValue !== backupValue;
@@ -507,11 +509,12 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
-              // Adicionar cellClassRules para backup
               if (col.backup && col.field) {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
+                    // Não aplicar backup na linha de total (pinned bottom)
+                    if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
                     return currentValue !== backupValue;
@@ -548,11 +551,12 @@ export default {
                 };
               }
 
-              // Adicionar cellClassRules para backup
               if (col.backup && col.field) {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
+                    // Não aplicar backup na linha de total (pinned bottom)
+                    if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
                     return currentValue !== backupValue;
