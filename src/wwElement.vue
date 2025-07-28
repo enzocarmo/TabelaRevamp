@@ -139,56 +139,11 @@ export default {
       setData(rowsData);
     };
 
-    const forceColorRefresh = () => {
-      if (!gridApi.value) return;
-
-      // Verifica se há colunas com cor customizada
-      const hasCustomColors = props.content.columns.some(col => col.useCustomCellColor);
-
-      if (!hasCustomColors) return;
-
-      // Múltiplos refreshes para garantir que as cores sejam aplicadas
-      setTimeout(() => {
-        if (gridApi.value) {
-          gridApi.value.refreshCells({
-            force: true,
-            suppressFlash: true
-          });
-        }
-      }, 10);
-
-      setTimeout(() => {
-        if (gridApi.value) {
-          gridApi.value.refreshCells({
-            force: true,
-            suppressFlash: true
-          });
-        }
-      }, 50);
-    };
-
     watch(
       () => props.content.rowData,
       (newData, oldData) => {
         const rawData = wwLib.wwUtils.getDataFromCollection(newData);
         setData(Array.isArray(rawData) ? rawData : []);
-
-        // Força refresh do grid após mudança nos dados
-        setTimeout(() => {
-          if (gridApi.value) {
-            // Força refresh completo
-            gridApi.value.refreshCells({ force: true });
-            gridApi.value.redrawRows();
-
-            // Verifica se há colunas com cor customizada
-            const hasCustomColors = props.content.columns.some(col => col.useCustomCellColor);
-
-            if (hasCustomColors) {
-              // Chama o método específico para atualizar cores
-              forceColorRefresh();
-            }
-          }
-        }, 0);
       },
       {
         immediate: true,
@@ -281,7 +236,6 @@ export default {
       onRowSelected,
       onSelectionChanged,
       sizeColumnsToFit,
-      forceColorRefresh,
       updateDataAfterFilterAndSort,
       gridApi,
       forceGridRefresh,
@@ -470,8 +424,6 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
-              this.applyCustomCellColor(columnDef, col);
-
               break;
             }
             case "currency": {
@@ -498,8 +450,6 @@ export default {
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
-
-              this.applyCustomCellColor(columnDef, col);
 
               break;
             }
@@ -528,8 +478,6 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
-              this.applyCustomCellColor(columnDef, col);
-
               break;
             }
             default: {
@@ -549,8 +497,6 @@ export default {
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
-
-              this.applyCustomCellColor(columnDef, col);
 
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
@@ -732,65 +678,6 @@ export default {
           columnIndex: event.columnApi ? event.columnApi.getDisplayedColumns().indexOf(event.column) : null,
         },
       });
-    },
-    applyCustomCellColor(columnDef, col) {
-      if (!col.useCustomCellColor) return;
-
-      columnDef.cellStyle = (params) => {
-        try {
-          // Verificar se é linha de total
-          if (params.node && params.node.rowPinned === 'bottom') {
-            return null;
-          }
-
-          // Verificar se é skeleton row
-          if (params.data?._isSkeletonRow) {
-            return null;
-          }
-
-          // ADIÇÃO: Forçar recálculo usando dados mais atuais
-          const currentData = params.node.data;
-
-          const colorResult = this.resolveMappingFormula(
-            col.cellColorFormula,
-            currentData
-          );
-
-          if (!colorResult) return null;
-
-          let finalStyle = {};
-
-          if (typeof colorResult === 'string') {
-            finalStyle.backgroundColor = colorResult;
-          } else if (typeof colorResult === 'object') {
-            finalStyle = { ...colorResult };
-          }
-
-          // Remove cores neutras para preservar alternate color
-          if (finalStyle.backgroundColor &&
-            (finalStyle.backgroundColor === '#ffffff' ||
-              finalStyle.backgroundColor === 'white' ||
-              finalStyle.backgroundColor === '' ||
-              finalStyle.backgroundColor === 'transparent')) {
-            delete finalStyle.backgroundColor;
-          }
-
-          return Object.keys(finalStyle).length > 0 ? finalStyle : null;
-
-        } catch (error) {
-          console.warn('Error resolving cell color formula:', error);
-          return null;
-        }
-      };
-
-      // ADIÇÃO: Força recálculo quando os dados mudam
-      columnDef.cellStyleClass = (params) => {
-        // Retorna uma classe baseada no valor atual para forçar recálculo
-        if (params.data?._isSkeletonRow) return null;
-
-        const timestamp = params.data?._reactiveKey || Date.now();
-        return `cell-style-${timestamp}`;
-      };
     },
     onRowDoubleClicked(event) {
       this.$emit("trigger-event", {
