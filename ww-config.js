@@ -138,6 +138,11 @@ export default {
       action: "stopEditing",
       args: [],
     },
+    {
+      label: "Refresh Cells",
+      action: "refreshCells",
+      args: [],
+    },
   ],
   properties: {
     headerTitle: {
@@ -978,6 +983,14 @@ export default {
               },
               comparative: {
                 label: "Comparative Values",
+                type: "OnOff",
+                hidden:
+                  array?.item?.cellDataType === "action" ||
+                  array?.item?.cellDataType === "image" ||
+                  array?.item?.cellDataType === "custom",
+              },
+              backup: {
+                label: "Backup",
                 type: "OnOff",
                 hidden:
                   array?.item?.cellDataType === "action" ||

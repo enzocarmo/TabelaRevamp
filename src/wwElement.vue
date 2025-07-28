@@ -83,6 +83,10 @@ export default {
         defaultValue: {},
         readonly: true,
       });
+    const refreshCells = () => {
+      if (!gridApi.value) return;
+      gridApi.value.refreshCells({ force: true });
+    };
     const { value: sortValue, setValue: setSort } =
       wwLib.wwVariable.useComponentVariable({
         uid: props.uid,
@@ -239,6 +243,7 @@ export default {
       updateDataAfterFilterAndSort,
       gridApi,
       forceGridRefresh,
+      refreshCells,
       forceStyleRefresh,
       onFilterChanged,
       stopEditing,
@@ -424,6 +429,18 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
+              // Adicionar cellClassRules para backup
+              if (col.backup && col.field) {
+                columnDef.cellClassRules = {
+                  backup: (params) => {
+                    if (!params.data) return false;
+                    const currentValue = params.data[col.field];
+                    const backupValue = params.data[`${col.field}_backup`];
+                    return currentValue !== backupValue;
+                  }
+                };
+              }
+
               break;
             }
             case "currency": {
@@ -449,6 +466,18 @@ export default {
 
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
+              }
+
+              // Adicionar cellClassRules para backup
+              if (col.backup && col.field) {
+                columnDef.cellClassRules = {
+                  backup: (params) => {
+                    if (!params.data) return false;
+                    const currentValue = params.data[col.field];
+                    const backupValue = params.data[`${col.field}_backup`];
+                    return currentValue !== backupValue;
+                  }
+                };
               }
 
               break;
@@ -478,6 +507,18 @@ export default {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
 
+              // Adicionar cellClassRules para backup
+              if (col.backup && col.field) {
+                columnDef.cellClassRules = {
+                  backup: (params) => {
+                    if (!params.data) return false;
+                    const currentValue = params.data[col.field];
+                    const backupValue = params.data[`${col.field}_backup`];
+                    return currentValue !== backupValue;
+                  }
+                };
+              }
+
               break;
             }
             default: {
@@ -504,6 +545,18 @@ export default {
                     col.displayLabelFormula,
                     params.data
                   );
+                };
+              }
+
+              // Adicionar cellClassRules para backup
+              if (col.backup && col.field) {
+                columnDef.cellClassRules = {
+                  backup: (params) => {
+                    if (!params.data) return false;
+                    const currentValue = params.data[col.field];
+                    const backupValue = params.data[`${col.field}_backup`];
+                    return currentValue !== backupValue;
+                  }
                 };
               }
             }
@@ -792,6 +845,10 @@ export default {
 
 .ag-cell {
   font-weight: 600;
+}
+
+.backup {
+  background-color: #F9EDCD !important;
 }
 
 // Estilos globais para inputs de edição - mais agressivos
