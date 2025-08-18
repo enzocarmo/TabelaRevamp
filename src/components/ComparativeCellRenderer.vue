@@ -4,7 +4,7 @@
             {{ formattedValue }}
             <PhCaretDown v-if="isNegative && hasValue" :size="20" weight="fill" class="icon" />
             <PhCaretUp v-if="isPositive && hasValue" :size="20" weight="fill" class="icon" />
-            <PhMinus v-if="isZero && hasValue" :size="20" weight="fill" class="icon" />
+            <PhMinus v-if="isZero && hasValue" :size="20" weight="bold" class="icon" />
         </span>
     </div>
 </template>
