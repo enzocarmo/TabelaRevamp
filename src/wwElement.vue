@@ -103,7 +103,7 @@ export default {
         defaultValue: [],
         readonly: true,
       });
-
+// 
     watchEffect(() => {
       if (!gridApi.value) return;
       if (props.content.initialFilters) {
