@@ -13,6 +13,7 @@ export default {
         "headerFontWeight",
         "headerFontSize",
         "headerFontFamily",
+        "filterIconColor",
       ],
       [
         "rowTitle",
@@ -289,6 +290,25 @@ export default {
         markdown: "font-size",
         type: "string",
         cssSupports: "font-size",
+      },
+    },
+    filterIconColor: {
+      type: "Color",
+      label: "Filter Icon Color",
+      options: {
+        nullable: true,
+      },
+      responsive: true,
+      bindable: true,
+      states: true,
+      classes: true,
+      bindingValidation: {
+        markdown: "color",
+        type: "string",
+        cssSupports: "color",
+      },
+      propertyHelp: {
+        tooltip: "Color of the filter icon when a filter is active",
       },
     },
     textColor: {
