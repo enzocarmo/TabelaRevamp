@@ -681,9 +681,7 @@ export default {
         focusShadow: this.content.focusShadow?.length
           ? this.content.focusShadow
           : undefined,
-        // Adicione esta linha para controlar a cor do ícone de filtro:
         accentColor: this.content.filterIconColor,
-        // Novas propriedades para input de edição
         inputBorderColor: this.content.editInputBorderColor,
         inputFontFamily: this.content.editInputFontFamily,
         inputFontWeight: this.content.editInputFontWeight,
