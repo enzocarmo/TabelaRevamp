@@ -8,7 +8,8 @@
       :columnHoverHighlight="content.columnHoverHighlight" :singleClickEdit="true" :locale-text="localeText"
       @grid-ready="onGridReady" @row-selected="onRowSelected" @selection-changed="onSelectionChanged"
       @cell-value-changed="onCellValueChanged" @cell-double-clicked="onCellDoubleClicked"
-      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-double-clicked="onRowDoubleClicked">
+      @filter-changed="onFilterChanged" @sort-changed="onSortChanged" @row-double-clicked="onRowDoubleClicked"
+      @row-data-updated="onRowDataUpdated">
     </ag-grid-vue>
   </div>
 </template>
@@ -130,14 +131,6 @@ export default {
       gridApi.value.autoSizeColumns(allColumnIds, false);
     };
 
-    const refreshBackupCells = () => {
-      if (!gridApi.value) return;
-      gridApi.value.refreshCells({
-        force: true,
-        suppressFlash: true
-      });
-    };
-
     const updateDataAfterFilterAndSort = () => {
       if (!gridApi.value) return;
 
@@ -156,10 +149,6 @@ export default {
       (newData, oldData) => {
         const rawData = wwLib.wwUtils.getDataFromCollection(newData);
         setData(Array.isArray(rawData) ? rawData : []);
-
-        setTimeout(() => {
-          refreshBackupCells();
-        }, 0);
       },
       {
         immediate: true,
@@ -213,20 +202,16 @@ export default {
       updateDataAfterFilterAndSort();
     };
 
-    const forceGridRefresh = () => {
-      if (!gridApi.value) return;
-
-      gridApi.value.refreshCells({ force: true });
-      gridApi.value.redrawRows();
-    };
-
-    const forceStyleRefresh = () => {
-      if (!gridApi.value) return;
-
-      gridApi.value.refreshCells({
-        force: true,
-        suppressFlash: true
-      });
+    const onRowDataUpdated = () => {
+      // Faz refresh das células de backup sempre que os dados são atualizados
+      if (gridApi.value) {
+        setTimeout(() => {
+          gridApi.value.refreshCells({
+            force: true,
+            suppressFlash: true
+          });
+        }, 0);
+      }
     };
 
     const stopEditing = () => {
@@ -254,10 +239,8 @@ export default {
       sizeColumnsToFit,
       updateDataAfterFilterAndSort,
       gridApi,
-      forceGridRefresh,
       refreshCells,
-      forceStyleRefresh,
-      refreshBackupCells,
+      onRowDataUpdated,
       onFilterChanged,
       stopEditing,
       onSortChanged,
@@ -734,9 +717,16 @@ export default {
         },
       });
 
-      setTimeout(() => {
-        this.refreshBackupCells();
-      }, 0);
+      // Refresh mais simples e direto
+      if (this.gridApi) {
+        setTimeout(() => {
+          this.gridApi.refreshCells({
+            force: true,
+            suppressFlash: true,
+            rowNodes: [event.node] // Só atualiza a linha editada
+          });
+        }, 0);
+      }
     },
     onCellDoubleClicked(event) {
       this.$emit("trigger-event", {
