@@ -130,6 +130,14 @@ export default {
       gridApi.value.autoSizeColumns(allColumnIds, false);
     };
 
+    const refreshBackupCells = () => {
+      if (!gridApi.value) return;
+      gridApi.value.refreshCells({
+        force: true,
+        suppressFlash: true
+      });
+    };
+
     const updateDataAfterFilterAndSort = () => {
       if (!gridApi.value) return;
 
@@ -148,10 +156,14 @@ export default {
       (newData, oldData) => {
         const rawData = wwLib.wwUtils.getDataFromCollection(newData);
         setData(Array.isArray(rawData) ? rawData : []);
+
+        setTimeout(() => {
+          refreshBackupCells();
+        }, 0);
       },
       {
         immediate: true,
-        deep: true // Detecta mudanças internas nos objetos
+        deep: true
       }
     );
 
@@ -245,6 +257,7 @@ export default {
       forceGridRefresh,
       refreshCells,
       forceStyleRefresh,
+      refreshBackupCells,
       onFilterChanged,
       stopEditing,
       onSortChanged,
@@ -720,6 +733,10 @@ export default {
           row: event.data,
         },
       });
+
+      setTimeout(() => {
+        this.refreshBackupCells();
+      }, 0);
     },
     onCellDoubleClicked(event) {
       this.$emit("trigger-event", {
