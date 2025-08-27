@@ -855,11 +855,21 @@ export default {
 }
 
 .ag-cell {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .backup {
   background-color: #F9EDCD !important;
+}
+
+.ag-theme-quartz {
+  --ag-border-radius: 14px;
+  --ag-card-radius: 14px;
+}
+
+.ag-theme-quartz .ag-root-wrapper {
+  border-radius: var(--ag-border-radius);
+  overflow: hidden;
 }
 
 // Estilos globais para inputs de edição - mais agressivos

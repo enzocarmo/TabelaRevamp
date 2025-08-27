@@ -21,8 +21,8 @@ export default {
 
 .skeleton-loader {
     height: 14px;
-    background-color: #a19b9d4d;
-    border-radius: 2px;
+    background-color: #E0E0E0;
+    border-radius: 6px;
     width: 100%;
     animation: skeleton-wave 1.5s ease-in-out infinite;
     position: relative;
