@@ -862,14 +862,8 @@ export default {
   background-color: #F9EDCD !important;
 }
 
-.ag-theme-quartz {
-  --ag-border-radius: 14px;
-  --ag-card-radius: 14px;
-}
-
-.ag-theme-quartz .ag-root-wrapper {
-  border-radius: var(--ag-border-radius);
-  overflow: hidden;
+.ag-root-wrapper {
+  border-radius: 14px !important;
 }
 
 // Estilos globais para inputs de edição - mais agressivos
