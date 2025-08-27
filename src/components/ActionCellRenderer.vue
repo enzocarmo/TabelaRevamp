@@ -12,7 +12,7 @@
 
 <script>
 export default {
-    name: "ImageCellRenderer",
+    name: "ActionCellRenderer",
     props: {
         params: {
             type: Object,
