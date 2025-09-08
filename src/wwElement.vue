@@ -414,21 +414,32 @@ export default {
                 editable: col.editable,
               };
 
-              // Se useCustomLabel estiver ativo, use a fórmula customizada
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
-                  return this.resolveMappingFormula(
+                  const customValue = this.resolveMappingFormula(
                     col.displayLabelFormula,
                     params.data
                   );
+
+                  // Se o valor customizado for um número, aplique a formatação
+                  const numericValue = Number(customValue);
+                  if (!isNaN(numericValue) && customValue !== null && customValue !== undefined) {
+                    return numericValue.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    });
+                  }
+
+                  // Se não for um número válido, retorne o valor customizado como está
+                  return customValue;
                 };
               } else {
                 // Caso contrário, use o formatador padrão de número
                 columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return Number(params.value).toLocaleString('pt-BR', {
-                    minimumFractionDigits: col.decimalPlaces || 2,
-                    maximumFractionDigits: col.decimalPlaces || 2
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                   });
                 };
               }
@@ -466,25 +477,35 @@ export default {
                 editable: col.editable,
               };
 
-              // Se useCustomLabel estiver ativo, use a fórmula customizada
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
-                  return this.resolveMappingFormula(
+                  const customValue = this.resolveMappingFormula(
                     col.displayLabelFormula,
                     params.data
                   );
+
+                  // Se o valor customizado for um número, aplique a formatação de moeda
+                  const numericValue = Number(customValue);
+                  if (!isNaN(numericValue) && customValue !== null && customValue !== undefined) {
+                    return `R$ ${numericValue.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}`;
+                  }
+
+                  // Se não for um número válido, retorne o valor customizado como está
+                  return customValue;
                 };
               } else {
                 // Caso contrário, use o formatador padrão de moeda
                 columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return `R$ ${Number(params.value).toLocaleString('pt-BR', {
-                    minimumFractionDigits: col.decimalPlaces || 2,
-                    maximumFractionDigits: col.decimalPlaces || 2
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                   })}`;
                 };
               }
-
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
               }
@@ -521,10 +542,22 @@ export default {
               // Se useCustomLabel estiver ativo, use a fórmula customizada
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
-                  return this.resolveMappingFormula(
+                  const customValue = this.resolveMappingFormula(
                     col.displayLabelFormula,
                     params.data
                   );
+
+                  // Se o valor customizado for um número, aplique a formatação de porcentagem
+                  const numericValue = Number(customValue);
+                  if (!isNaN(numericValue) && customValue !== null && customValue !== undefined) {
+                    return `${numericValue.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}%`;
+                  }
+
+                  // Se não for um número válido, retorne o valor customizado como está
+                  return customValue;
                 };
               } else {
                 // Caso contrário, use o formatador padrão de porcentagem
