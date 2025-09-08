@@ -26,29 +26,34 @@ export default {
         },
     },
     computed: {
+        // NOVA LÓGICA: Usa o valor formatado se disponível para comparação
+        valueForComparison() {
+            // Se há valueFormatted (valor customizado), extrair o número dele
+            if (this.params.valueFormatted && this.params.valueFormatted !== this.params.value) {
+                // Remove símbolos de moeda, porcentagem e formatação
+                const cleanValue = String(this.params.valueFormatted)
+                    .replace(/[R$\s%]/g, '') // Remove R$, espaços e %
+                    .replace(/\./g, '') // Remove pontos de milhar
+                    .replace(',', '.'); // Troca vírgula por ponto decimal
+
+                const numericValue = parseFloat(cleanValue);
+                return !isNaN(numericValue) ? numericValue : this.params.value;
+            }
+            // Caso contrário, usa o valor original
+            return this.params.value;
+        },
         hasValue() {
-            return this.params.value !== null && this.params.value !== undefined;
+            const compareValue = this.valueForComparison;
+            return compareValue !== null && compareValue !== undefined && !isNaN(compareValue);
         },
         isNegative() {
-            // Parse string or number values
-            const value = typeof this.params.value === 'string'
-                ? parseFloat(this.params.value)
-                : this.params.value;
-            return this.hasValue && value < 0;
+            return this.hasValue && this.valueForComparison < 0;
         },
         isZero() {
-            // Parse string or number values
-            const value = typeof this.params.value === 'string'
-                ? parseFloat(this.params.value)
-                : this.params.value;
-            return this.hasValue && value === 0;
+            return this.hasValue && this.valueForComparison === 0;
         },
         isPositive() {
-            // Parse string or number values
-            const value = typeof this.params.value === 'string'
-                ? parseFloat(this.params.value)
-                : this.params.value;
-            return this.hasValue && value > 0;
+            return this.hasValue && this.valueForComparison > 0;
         },
         formattedValue() {
             return this.params.valueFormatted || this.params.value;
@@ -62,23 +67,23 @@ export default {
     height: 100%;
     display: flex;
     align-items: center;
-    
+
     span {
         display: flex;
         align-items: center;
-        
+
         &.negative {
             color: #F8471C;
         }
-        
+
         &.positive {
             color: #27be52;
         }
-        
+
         &.zero {
             color: #140F10;
         }
-        
+
         .icon {
             padding-left: 4px;
         }
