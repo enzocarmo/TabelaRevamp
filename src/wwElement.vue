@@ -35,11 +35,10 @@ import WewebCellRenderer from "./components/WewebCellRenderer.vue";
 import ComparativeCellRenderer from "./components/ComparativeCellRenderer.vue";
 import SkeletonCellRenderer from "./components/SkeletonCellRenderer.vue";
 
-console.log("AG Grid version:", AG_GRID_LOCALE_FR);
-
-// TODO: maybe register less modules
-// TODO: maybe register modules per grid instead of globally
-ModuleRegistry.registerModules([AllCommunityModule]);
+// Registro seguro de módulos
+if (!ModuleRegistry.getModules().some(module => module === AllCommunityModule)) {
+  ModuleRegistry.registerModules([AllCommunityModule]);
+}
 
 export default {
   components: {
@@ -203,7 +202,6 @@ export default {
     };
 
     const onRowDataUpdated = () => {
-      // Faz refresh das células de backup sempre que os dados são atualizados
       if (gridApi.value) {
         setTimeout(() => {
           gridApi.value.refreshCells({
@@ -260,7 +258,7 @@ export default {
               ...(props.content.localeText || {}),
             };
           default:
-            AG_GRID_LOCALE_EN;
+            return AG_GRID_LOCALE_EN; // CORRIGIDO: adicionado return
         }
       }),
       /* wwEditor:start */
@@ -292,7 +290,6 @@ export default {
         return skeletonRows;
       }
 
-      // MUDANÇA PRINCIPAL: Força reatividade criando novos objetos
       const data = this.rowData;
       return data.map((row, index) => ({
         ...row,
@@ -321,7 +318,6 @@ export default {
     columnDefs() {
       const isLoading = this.content.loading;
 
-      // Primeiro, processamos as colunas normalmente
       const processedColumns = this.content.columns.map((col) => {
         const minWidth =
           !col.minWidth || col.minWidth === "auto"
@@ -414,7 +410,6 @@ export default {
                 editable: col.editable,
               };
 
-              // Se useCustomLabel estiver ativo, use a fórmula customizada
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
                   return this.resolveMappingFormula(
@@ -423,7 +418,6 @@ export default {
                   );
                 };
               } else {
-                // Caso contrário, use o formatador padrão de número
                 columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return Number(params.value).toLocaleString('pt-BR', {
@@ -441,7 +435,6 @@ export default {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
-                    // Não aplicar backup na linha de total (pinned bottom)
                     if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
@@ -466,7 +459,6 @@ export default {
                 editable: col.editable,
               };
 
-              // Se useCustomLabel estiver ativo, use a fórmula customizada
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
                   return this.resolveMappingFormula(
@@ -475,7 +467,6 @@ export default {
                   );
                 };
               } else {
-                // Caso contrário, use o formatador padrão de moeda
                 columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return `R$ ${Number(params.value).toLocaleString('pt-BR', {
@@ -493,7 +484,6 @@ export default {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
-                    // Não aplicar backup na linha de total (pinned bottom)
                     if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
@@ -518,7 +508,6 @@ export default {
                 editable: col.editable,
               };
 
-              // Se useCustomLabel estiver ativo, use a fórmula customizada
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
                   return this.resolveMappingFormula(
@@ -527,7 +516,6 @@ export default {
                   );
                 };
               } else {
-                // Caso contrário, use o formatador padrão de porcentagem
                 columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return `${Number(params.value).toLocaleString('pt-BR', {
@@ -545,7 +533,6 @@ export default {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
-                    // Não aplicar backup na linha de total (pinned bottom)
                     if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
@@ -587,7 +574,6 @@ export default {
                 columnDef.cellClassRules = {
                   backup: (params) => {
                     if (!params.data) return false;
-                    // Não aplicar backup na linha de total (pinned bottom)
                     if (params.node.rowPinned === 'bottom') return false;
                     const currentValue = params.data[col.field];
                     const backupValue = params.data[`${col.field}_backup`];
@@ -599,36 +585,29 @@ export default {
           }
         }
 
-        // Adicionamos informação sobre o grupo da coluna para processamento posterior
         return {
           columnDef,
           columnGroup: col.columnGroup
         };
       });
 
-      // Agora vamos organizar as colunas em grupos
       const columnGroups = {};
       const finalColumnDefs = [];
 
-      // Percorremos as colunas processadas para organizá-las
       processedColumns.forEach(({ columnDef, columnGroup }) => {
-        // Se a coluna não pertence a nenhum grupo, adicionamos diretamente ao array final
         if (columnGroup === "") {
           finalColumnDefs.push(columnDef);
           return;
         }
 
-        // Se o grupo já existe, adicionamos a coluna aos filhos
         if (columnGroups[columnGroup]) {
           columnGroups[columnGroup].children.push(columnDef);
         }
-        // Se o grupo não existe, criamos um novo
         else {
           columnGroups[columnGroup] = {
             headerName: columnGroup,
             children: [columnDef]
           };
-          // Adicionamos o novo grupo ao array final
           finalColumnDefs.push(columnGroups[columnGroup]);
         }
       });
@@ -672,7 +651,6 @@ export default {
         "--ww-data-grid_action-padding": this.content.actionPadding,
         "--ww-data-grid_action-border": this.content.actionBorder,
         "--ww-data-grid_action-borderRadius": this.content.actionBorderRadius,
-        // Variáveis para input de edição
         "--ww-data-grid_edit-input-border-color": this.content.editInputBorderColor,
         "--ww-data-grid_edit-input-font-family": this.content.editInputFontFamily,
         "--ww-data-grid_edit-input-font-weight": this.content.editInputFontWeight,
@@ -702,21 +680,8 @@ export default {
         backgroundColor: this.content.rowBackgroundColor,
         rowHoverColor: this.content.rowHoverColor,
         selectedRowBackgroundColor: this.content.selectedRowBackgroundColor,
-        rowVerticalPaddingScale: this.content.rowVerticalPaddingScale || 1,
-        menuBackgroundColor: this.content.menuBackgroundColor,
-        menuTextColor: this.content.menuTextColor,
-        columnHoverColor: this.content.columnHoverColor,
         foregroundColor: this.content.textColor,
-        checkboxCheckedBackgroundColor: this.content.selectionCheckboxColor,
-        rangeSelectionBorderColor: this.content.cellSelectionBorderColor,
-        checkboxUncheckedBorderColor: this.content.checkboxUncheckedBorderColor,
-        focusShadow: this.content.focusShadow?.length
-          ? this.content.focusShadow
-          : undefined,
-        accentColor: this.content.filterIconColor,
-        inputBorderColor: this.content.editInputBorderColor,
-        inputFontFamily: this.content.editInputFontFamily,
-        inputFontWeight: this.content.editInputFontWeight,
+        // Removidas propriedades que podem não ser suportadas pelo themeQuartz
       });
     },
     isEditing() {
@@ -725,7 +690,6 @@ export default {
         this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION
       );
       /* wwEditor:end */
-      // eslint-disable-next-line no-unreachable
       return false;
     },
   },
@@ -753,13 +717,12 @@ export default {
         },
       });
 
-      // Refresh mais simples e direto
       if (this.gridApi) {
         setTimeout(() => {
           this.gridApi.refreshCells({
             force: true,
             suppressFlash: true,
-            rowNodes: [event.node] // Só atualiza a linha editada
+            rowNodes: [event.node]
           });
         }, 0);
       }
@@ -851,7 +814,6 @@ export default {
 
         if (this.wwEditorState.isACopy) return;
 
-        // We assume there will only be one custom column each time
         const columnIndex = (this.content.columns || []).findIndex(
           (col) => col.cellDataType === "custom" && !col.containerId
         );
@@ -886,7 +848,6 @@ export default {
       z-index: 10;
     }
   }
-
   /* wwEditor:end */
 }
 
@@ -902,7 +863,6 @@ export default {
   border-radius: 14px !important;
 }
 
-// Estilos globais para inputs de edição - mais agressivos
 .ww-datagrid {
   input {
     &[class*="ag-"] {
@@ -912,7 +872,6 @@ export default {
     }
   }
 
-  // Força aplicação em todos os inputs dentro do grid
   :deep(input) {
     border-color: var(--ww-data-grid_edit-input-border-color) !important;
     font-family: var(--ww-data-grid_edit-input-font-family) !important;
@@ -920,7 +879,6 @@ export default {
   }
 }
 
-// Estilos globais ainda mais específicos
 .ag-theme-quartz input,
 .ag-theme-quartz-dark input {
   border-color: var(--ww-data-grid_edit-input-border-color) !important;
