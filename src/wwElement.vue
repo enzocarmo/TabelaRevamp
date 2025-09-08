@@ -292,7 +292,6 @@ export default {
         return skeletonRows;
       }
 
-      // MUDANÇA PRINCIPAL: Força reatividade criando novos objetos
       const data = this.rowData;
       return data.map((row, index) => ({
         ...row,
