@@ -412,14 +412,26 @@ export default {
                   defaultJoinOperator: 'AND'
                 },
                 editable: col.editable,
-                valueFormatter: (params) => {
+              };
+
+              // Se useCustomLabel estiver ativo, use a fórmula customizada
+              if (col.useCustomLabel) {
+                columnDef.valueFormatter = (params) => {
+                  return this.resolveMappingFormula(
+                    col.displayLabelFormula,
+                    params.data
+                  );
+                };
+              } else {
+                // Caso contrário, use o formatador padrão de número
+                columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return Number(params.value).toLocaleString('pt-BR', {
                     minimumFractionDigits: col.decimalPlaces || 2,
                     maximumFractionDigits: col.decimalPlaces || 2
                   });
-                }
-              };
+                };
+              }
 
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
@@ -452,14 +464,26 @@ export default {
                   defaultJoinOperator: 'AND'
                 },
                 editable: col.editable,
-                valueFormatter: (params) => {
+              };
+
+              // Se useCustomLabel estiver ativo, use a fórmula customizada
+              if (col.useCustomLabel) {
+                columnDef.valueFormatter = (params) => {
+                  return this.resolveMappingFormula(
+                    col.displayLabelFormula,
+                    params.data
+                  );
+                };
+              } else {
+                // Caso contrário, use o formatador padrão de moeda
+                columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return `R$ ${Number(params.value).toLocaleString('pt-BR', {
                     minimumFractionDigits: col.decimalPlaces || 2,
                     maximumFractionDigits: col.decimalPlaces || 2
                   })}`;
-                }
-              };
+                };
+              }
 
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
@@ -492,14 +516,26 @@ export default {
                   defaultJoinOperator: 'AND'
                 },
                 editable: col.editable,
-                valueFormatter: (params) => {
+              };
+
+              // Se useCustomLabel estiver ativo, use a fórmula customizada
+              if (col.useCustomLabel) {
+                columnDef.valueFormatter = (params) => {
+                  return this.resolveMappingFormula(
+                    col.displayLabelFormula,
+                    params.data
+                  );
+                };
+              } else {
+                // Caso contrário, use o formatador padrão de porcentagem
+                columnDef.valueFormatter = (params) => {
                   if (params.value === null || params.value === undefined) return '';
                   return `${Number(params.value).toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}%`;
-                }
-              };
+                };
+              }
 
               if (col.comparative) {
                 columnDef.cellRenderer = "ComparativeCellRenderer";
