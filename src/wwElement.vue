@@ -416,6 +416,16 @@ export default {
 
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
+                  // Se for linha de total, usa o valor normal (totalValue)
+                  if (params.node.rowPinned === 'bottom') {
+                    if (params.value === null || params.value === undefined) return '';
+                    return Number(params.value).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    });
+                  }
+
+                  // Caso contrário, usa o custom display value
                   const customValue = this.resolveMappingFormula(
                     col.displayLabelFormula,
                     params.data
@@ -479,6 +489,16 @@ export default {
 
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
+                  // Se for linha de total, usa o valor normal (totalValue)
+                  if (params.node.rowPinned === 'bottom') {
+                    if (params.value === null || params.value === undefined) return '';
+                    return `R$ ${Number(params.value).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}`;
+                  }
+
+                  // Caso contrário, usa o custom display value
                   const customValue = this.resolveMappingFormula(
                     col.displayLabelFormula,
                     params.data
@@ -542,6 +562,16 @@ export default {
               // Se useCustomLabel estiver ativo, use a fórmula customizada
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
+                  // Se for linha de total, usa o valor normal (totalValue)
+                  if (params.node.rowPinned === 'bottom') {
+                    if (params.value === null || params.value === undefined) return '';
+                    return `${Number(params.value).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}%`;
+                  }
+
+                  // Caso contrário, usa o custom display value
                   const customValue = this.resolveMappingFormula(
                     col.displayLabelFormula,
                     params.data
@@ -609,6 +639,12 @@ export default {
 
               if (col.useCustomLabel) {
                 columnDef.valueFormatter = (params) => {
+                  // Se for linha de total, retorna o valor normal (totalValue)
+                  if (params.node.rowPinned === 'bottom') {
+                    return params.value;
+                  }
+
+                  // Caso contrário, usa o custom display value
                   return this.resolveMappingFormula(
                     col.displayLabelFormula,
                     params.data
