@@ -144,6 +144,82 @@ export default {
       action: "refreshCells",
       args: [],
     },
+    {
+      label: "Set Filter",
+      action: "setFilter",
+      args: [
+        {
+          name: "columnId",
+          type: "Text",
+          label: "Column ID (field name)",
+        },
+        {
+          name: "filterType",
+          type: "TextSelect",
+          label: "Filter Type",
+          options: {
+            options: [
+              { value: "equals", label: "Equals" },
+              { value: "notEqual", label: "Not Equal" },
+              { value: "contains", label: "Contains" },
+              { value: "notContains", label: "Not Contains" },
+              { value: "startsWith", label: "Starts With" },
+              { value: "endsWith", label: "Ends With" },
+              { value: "lessThan", label: "Less Than" },
+              { value: "lessThanOrEqual", label: "Less Than or Equal" },
+              { value: "greaterThan", label: "Greater Than" },
+              { value: "greaterThanOrEqual", label: "Greater Than or Equal" },
+              { value: "inRange", label: "Between (Range)" },
+              { value: "blank", label: "Is Blank" },
+              { value: "notBlank", label: "Is Not Blank" },
+            ],
+          },
+        },
+        {
+          name: "filterValue",
+          type: "Text",
+          label: "Filter Value",
+        },
+        {
+          name: "filterValueTo",
+          type: "Text",
+          label: "Filter Value To (for range)",
+        },
+      ],
+    },
+    {
+      label: "Set Sort",
+      action: "setSort",
+      args: [
+        {
+          name: "columnId",
+          type: "Text",
+          label: "Column ID (field name)",
+        },
+        {
+          name: "sortDirection",
+          type: "TextSelect",
+          label: "Sort Direction",
+          options: {
+            options: [
+              { value: "asc", label: "Ascending" },
+              { value: "desc", label: "Descending" },
+              { value: null, label: "Clear Sort" },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      label: "Clear All Filters",
+      action: "clearAllFilters",
+      args: [],
+    },
+    {
+      label: "Clear All Sorts",
+      action: "clearAllSorts",
+      args: [],
+    },
   ],
   properties: {
     headerTitle: {

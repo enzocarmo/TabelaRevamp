@@ -833,6 +833,178 @@ export default {
         }, 0);
       }
     },
+    setFilter(columnId, filterType, filterValue, filterValueTo) {
+      if (!this.gridApi) {
+        console.warn("Grid not ready yet");
+        return;
+      }
+
+      if (!columnId) {
+        console.warn("Column ID is required for setFilter");
+        return;
+      }
+
+      let filterModel = {};
+
+      switch (filterType) {
+        case "equals":
+          filterModel = {
+            filterType: "text",
+            type: "equals",
+            filter: filterValue,
+          };
+          break;
+
+        case "notEqual":
+          filterModel = {
+            filterType: "text",
+            type: "notEqual",
+            filter: filterValue,
+          };
+          break;
+
+        case "contains":
+          filterModel = {
+            filterType: "text",
+            type: "contains",
+            filter: filterValue,
+          };
+          break;
+
+        case "notContains":
+          filterModel = {
+            filterType: "text",
+            type: "notContains",
+            filter: filterValue,
+          };
+          break;
+
+        case "startsWith":
+          filterModel = {
+            filterType: "text",
+            type: "startsWith",
+            filter: filterValue,
+          };
+          break;
+
+        case "endsWith":
+          filterModel = {
+            filterType: "text",
+            type: "endsWith",
+            filter: filterValue,
+          };
+          break;
+
+        case "lessThan":
+          filterModel = {
+            filterType: "number",
+            type: "lessThan",
+            filter: parseFloat(filterValue),
+          };
+          break;
+
+        case "lessThanOrEqual":
+          filterModel = {
+            filterType: "number",
+            type: "lessThanOrEqual",
+            filter: parseFloat(filterValue),
+          };
+          break;
+
+        case "greaterThan":
+          filterModel = {
+            filterType: "number",
+            type: "greaterThan",
+            filter: parseFloat(filterValue),
+          };
+          break;
+
+        case "greaterThanOrEqual":
+          filterModel = {
+            filterType: "number",
+            type: "greaterThanOrEqual",
+            filter: parseFloat(filterValue),
+          };
+          break;
+
+        case "inRange":
+          filterModel = {
+            filterType: "number",
+            type: "inRange",
+            filter: parseFloat(filterValue),
+            filterTo: parseFloat(filterValueTo),
+          };
+          break;
+
+        case "blank":
+          filterModel = {
+            filterType: "text",
+            type: "blank",
+          };
+          break;
+
+        case "notBlank":
+          filterModel = {
+            filterType: "text",
+            type: "notBlank",
+          };
+          break;
+
+        default:
+          console.warn(`Unknown filter type: ${filterType}`);
+          return;
+      }
+
+      // Aplica o filtro na coluna específica
+      const currentFilterModel = this.gridApi.getFilterModel() || {};
+      currentFilterModel[columnId] = filterModel;
+      this.gridApi.setFilterModel(currentFilterModel);
+    },
+
+    setSort(columnId, sortDirection) {
+      if (!this.gridApi) {
+        console.warn("Grid not ready yet");
+        return;
+      }
+
+      if (!columnId) {
+        console.warn("Column ID is required for setSort");
+        return;
+      }
+
+      const sortModel = [];
+
+      if (sortDirection && (sortDirection === "asc" || sortDirection === "desc")) {
+        sortModel.push({
+          colId: columnId,
+          sort: sortDirection,
+        });
+      }
+      // Se sortDirection for null, o array fica vazio, removendo o sort
+
+      this.gridApi.applyColumnState({
+        state: sortModel,
+        defaultState: { sort: null },
+      });
+    },
+
+    clearAllFilters() {
+      if (!this.gridApi) {
+        console.warn("Grid not ready yet");
+        return;
+      }
+      this.gridApi.setFilterModel(null);
+    },
+
+    clearAllSorts() {
+      if (!this.gridApi) {
+        console.warn("Grid not ready yet");
+        return;
+      }
+      this.gridApi.applyColumnState({
+        defaultState: { sort: null },
+      });
+    },
     onCellDoubleClicked(event) {
       this.$emit("trigger-event", {
         name: "cellDoubleClicked",
